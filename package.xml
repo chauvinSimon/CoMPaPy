@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>compapy</name>
+    <version>0.1.0</version>
+    <description>Controlling Panda from Moveit!</description>
+    <maintainer email="simon.chauvin@esrlabs.com">Simon CHAUVIN</maintainer>
+    <license>BSD</license>
+    <url type="github">https://github.com/chauvinSimon/compapy</url>
+    <author email="simon.chauvin@esrlabs.com">Simon CHAUVIN</author>
+
+    <!-- buildtool_depend: dependencies of the build process -->
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <!-- exec_depend: only needed at execution time -->
+    <exec_depend>panda_moveit_config</exec_depend>
+
+</package>
