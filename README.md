@@ -1,59 +1,66 @@
-:construction: _work in progress_ :construction_worker:
+- `Co`ntrol with `M`oveIt of `Pa`nda robot in `Py`thon
+
+- :speaking_head: `CoMPaPy` = `[kɔm papi]` :older_man: (:fr:)
+
+- :construction: _work in progress_ :construction_worker:
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Last commit](https://img.shields.io/github/last-commit/chauvinSimon/compapy.svg?style=flat)](https://github.com/chauvinSimon/compapy/commits)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/chauvinSimon/compapy)](https://github.com/chauvinSimon/compapy/commits)
+[![Github Stars](https://img.shields.io/github/stars/chauvinSimon/compapy?style=flat&logo=github)](https://github.com/chauvinSimon/compapy/stargazers)
+[![Github Forks](https://img.shields.io/github/forks/chauvinSimon/compapy?style=flat&logo=github)](https://github.com/chauvinSimon/compapy/network/members)
+[![Github Watchers](https://img.shields.io/github/watchers/chauvinSimon/compapy?style=flat&logo=github)](https://github.com/chauvinSimon/compapy)
+[![GitHub contributors](https://img.shields.io/github/contributors/chauvinSimon/compapy)](https://github.com/chauvinSimon/compapy/graphs/contributors)
 
 # `CoMPaPy`
 
-`Co`ntrol with `M`oveIt of `Pa`nda robot in `Py`thon
-- :panda_face:
-- :robot:
-- :snake:
+## :eyeglasses: description
 
-:speaking_head: (:fr:): [kɔm papi] :older_man:
-
-### :eyeglasses: description
-
-**a simple python interface for basic control of a real [panda robot](https://www.franka.de/)
-with [moveit](https://ros-planning.github.io/moveit_tutorials/doc/getting_started/getting_started.html)**
+**"a simple python interface for basic control of a real [panda robot](https://www.franka.de/)
+with [moveit](https://ros-planning.github.io/moveit_tutorials/doc/getting_started/getting_started.html)"**
 
 - using only **official** and **maintained** repos: [`franka_ros`](https://frankaemika.github.io/docs/franka_ros.html)
   and [`MoveIt`](https://ros-planning.github.io/moveit_tutorials/doc/getting_started/getting_started.html)
-- both with `rviz` and with real robots
+- both for "`rviz` only" and "real panda"
 - no `cpp`, just `python`
 
-**Keywords:** `moveit!`, `franka_emika`, `franka_ros`, `libfranka`, `fci`, `panda`, `fr3`, `ROS`, `python`
+## :warning: limitations
 
-### :warning: limitations
-
-- rely on ROS
-- require lots of installations
-- require switching to a real-time kernel
+- rely on `ROS` :confused:
 - only tested on the following combination
     - (`ubuntu 20`, `noetic`, `fr3`, `libfranka 0.10.0`, `franka_ros 0.10.1`)
+    - _todo: docker_
+- require switching to a real-time kernel
+- require lots of installations
+    - _todo: docker_
 - only basic actions
     - `move_j`
     - `move_l`
     - `open_gripper`
     - `close_gripper`
-- some parameter tuning may be required
+- may require some parameter tuning
     - e.g. for the cartesian plan in `move_l`
     - _todo: collect params in config file_
-- control of `panda_link8` instead of the gripper
+- control `panda_link8` instead of the gripper :weary:
     - todo: `https://answers.ros.org/question/334902/moveit-control-gripper-instead-of-panda_link8-eff/`
-- no gazebo integration
-  - todo
+- no `gazebo` integration
+    - todo
 
 ## :wrench: installation
 
 notes
-- installing `libfranka` and `franka_ros` with `sudo apt install ros-noetic- ...` is not an option at the time of
-writing: it gives incompatible versions
 
-create dir for all packages
+- installing `libfranka` and `franka_ros` with `sudo apt install ros-noetic- ...` is not an option at the time of
+  writing: it gives incompatible versions
+
+create a dir for all packages
+
 ```
 mkdir -p ~/catkin_ws/src
 cd ~/catkin_ws/src
 ```
 
-### :dart: expected structure
+### :dart: final structure
 
 <details>
   <summary>click to expand</summary>
@@ -142,10 +149,10 @@ tree ~/catkin_ws/src -d -L 2
     ├── lib64 -> lib
     └── share
 ```
+
 </details>
 
-
-### :pick: building from Source
+### :pick: building from source
 
 only tested with these versions ([source](https://frankaemika.github.io/docs/compatibility.html)):
 
@@ -155,35 +162,25 @@ only tested with these versions ([source](https://frankaemika.github.io/docs/com
 
 #### :mag: `libfranka`
 
-following [these build instructions](https://frankaemika.github.io/docs/installation_linux.html#building-libfranka)
+follow [these instructions](https://frankaemika.github.io/docs/installation_linux.html#building-from-source)
 
-```
-cd build/
-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF ..
-cmake --build .
-cpack -G DEB
-sudo dpkg -i libfranka*.deb
-```
+#### :package: ROS meta-packages
 
-#### :package: ROS packages
+##### :panda_face: `franka_ros`
 
-##### :panda_face: `franka_ros` meta-package
+follow [these instructions](https://frankaemika.github.io/docs/installation_linux.html#building-the-ros-packages)
 
-follow [these build instructions](https://frankaemika.github.io/docs/installation_linux.html#building-the-ros-packages)
 - prefer `catkin build` to `catkin_make`
 
-```
-catkin build -DCMAKE_BUILD_TYPE=Release -DFranka_DIR:PATH=~/libfranka/build
-```
+##### :hourglass_flowing_sand: real-time kernel
 
 follow [these instructions](https://frankaemika.github.io/docs/installation_linux.html#setting-up-the-real-time-kernel)
-to set up the real-time kernel
 
 - check with `uname -r`
 
 ##### :cartwheeling: `moveit_panda_config`
 
-follow [these build instructions](https://ros-planning.github.io/moveit_tutorials/doc/getting_started/getting_started.html)
+follow [these instructions](https://ros-planning.github.io/moveit_tutorials/doc/getting_started/getting_started.html)
 
 - prefer `~/catkin_ws/src` to `~/ws_moveit/src`
 
@@ -193,15 +190,14 @@ follow [these build instructions](https://ros-planning.github.io/moveit_tutorial
 cd ~/catkin_ws/src
 python3 -m venv ven --system-site-packages
 source ven/bin/activate
-~/Downloads/pycharm-2021.3/bin/pycharm.sh
 ```
 
-#### :pencil2: `~/.bashrc`
+#### :pencil2: `source_catkin` alias in `~/.bashrc`
 
-I find convenient to add this alias
+this may be useful
 
 ```
-alias source_catkin="source ~/catkin_ws/devel/setup.bash; deactivate; source ~/catkin_ws/src/ven/bin/activate; cd ~/catkin_ws/src"
+alias source_catkin="source ~/catkin_ws/devel/setup.bash; source ~/catkin_ws/src/ven/bin/activate; cd ~/catkin_ws/src"
 ```
 
 #### :bug: troubleshooting
@@ -213,16 +209,17 @@ alias source_catkin="source ~/catkin_ws/devel/setup.bash; deactivate; source ~/c
 ### :writing_hand: pycharm
 
 follow [this great video](https://www.youtube.com/watch?v=lTew9mbXrAs) (Peter Mitrano)
+
 ```
 cd ~/catkin_ws
 python3 -m venv ven --system-site-packages
 source ven/bin/activate
 python -c "import ros; print(ros.__file__)"
-source ~/catkin_ws/devel(setup.sh
+source ~/catkin_ws/devel/setup.sh
 ```
 
-
 find the path to `pycharm.sh` either with `JetBrains ToolBox` or with
+
 ```
 sudo apt install locate
 sudo updatedb
@@ -233,11 +230,39 @@ locate pycharm.sh
 
 :warning: keep the emergency button close to you :rescue_worker_helmet:
 
+follow the [fci](https://frankaemika.github.io/docs/getting_started.html) instructions to configure `fci`
+
+switch on the robot
+
+in [`http://172.16.0.2/desk/`](http://172.16.0.2/desk/)
+
+- release joints
+- activate `fci`
+- Re-initialize Hand
+- choose "Execution" mode
+
+in a terminal
+
+- `source_catkin` (alias)
+
 ## :stethoscope: verifications
 
-### :link: `libfranka`
+_todo: test them all again_
+
+### :video_game: `move group` python Interface
+
+no real robot needed: follow
+this [tutorial](https://ros-planning.github.io/moveit_tutorials/doc/move_group_python_interface/move_group_python_interface_tutorial.html#move-group-python-interface)
+
+```
+roslaunch panda_moveit_config demo.launch rviz_tutorial:=true
+rosrun moveit_tutorials move_group_python_interface_tutorial.py
+```
+
+### :book: `libfranka`
 
 in `execution` mode
+
 ```
 ~/libfranka/build/examples/communication_test 172.16.0.2
 ```
@@ -245,48 +270,47 @@ in `execution` mode
 ### :popcorn: `franka_example_controllers`
 
 in `execution` mode
+
 ```
 roslaunch franka_visualization franka_visualization.launch robot_ip:=172.16.0.2 load_gripper:=true robot:=fr3
+
 roslaunch franka_example_controllers move_to_start.launch robot_ip:=172.16.0.2
-```
-
-### :video_game: `move group` python Interface
-
-only in 
-follow this [tutorial](https://ros-planning.github.io/moveit_tutorials/doc/move_group_python_interface/move_group_python_interface_tutorial.html#move-group-python-interface)
-
-```
-roslaunch panda_moveit_config demo.launch rviz_tutorial:=true
-rosrun moveit_tutorials move_group_python_interface_tutorial.py
 ```
 
 ### :tv: `rviz` visualization
 
 in `programming` mode
+
 ```
 roslaunch franka_visualization franka_visualization.launch robot_ip:=172.16.0.2 load_gripper:=true robot:=fr3
 ```
-move the robot manually (press the two buttons on the gripper) and see the corresponding motion in `rviz`
+
+- move the cooperative robot manually (press the two buttons on the gripper)
+- see the corresponding motion in `rviz`
 
 ### :computer_mouse: `rviz` control
 
 in `execution` mode
+
 ```
 roslaunch panda_moveit_config franka_control.launch robot_ip:=172.16.0.2 load_gripper:=true robot:=fr3
 ```
 
 in `rviz`:
-- add the `Motion Planning` plugin
-- drag the target pose
+
+- add the `MotionPlanning` plugin
+- drag the interactive marker to some the goal state
 - click `Plan` and the `Execute`
 - try different planning settings (cartesian path, speed, planning pipeline ...)
 - try to display and hide the different visualisation tools
+- I personally like the `Joints` tab in `MotionPlanning` plugin
 
 ### :clamp: gripper
 
 in `execution` mode
+
 ```
-# one of
+# run only one of
 roslaunch franka_gripper franka_gripper.launch robot_ip:=172.16.0.2
 roslaunch franka_control franka_control.launch robot_ip:=172.16.0.2
 roslaunch panda_moveit_config franka_control.launch robot_ip:=172.16.0.2 load_gripper:=true
@@ -294,6 +318,8 @@ roslaunch compapy real.launch robot_ip:172.16.0.2
 
 # todo: is `robot:=fr3` needed?
 ```
+
+then
 
 ```
 # close the gripper
@@ -306,22 +332,35 @@ rostopic pub --once /franka_gripper/move/goal franka_gripper/MoveActionGoal "goa
 ### :suspension_railway: `CoMPaPy` control
 
 ```
-# rviz only
+# either rviz only
 roslaunch compapy sim.launch
 
-# real robot (in execution mode)
+# or on real robot (in execution mode)
 roslaunch compapy real.launch robot_ip:172.16.0.2
 ```
 
 ```
-(ven) python scripts/ todo test pre-defined actions
-```
+cd ~/catkin_ws/src_compapy
 
-:mag:
-:joystick:
+# todo: do I need `export PYTHONPATH=${PYTHONPATH}:${PWD}`?
+
+(ven) python scripts/main_test_ref_actions.py
+```
 
 ## :checkered_flag: usage
 
+### :evergreen_tree: scene
+
+define obstacles in [`scene.json`](config/obstacles.json)
+
+visualize them with
+
+```
+roslaunch compapy sim.launch
+```
+
+### todo
+
 ```
 # rviz only
 roslaunch compapy sim.launch
@@ -330,29 +369,15 @@ roslaunch compapy sim.launch
 roslaunch compapy real.launch robot_ip:172.16.0.2
 ```
 
-### :robot: real robot
+:mag:
 
-switch on the panda
+in programming mode, move a bit the robot away from its default pose prepare to interrupt from the emergency button
 
-in [`http://172.16.0.2/desk/`](http://172.16.0.2/desk/)
-- release joints
-- activate FCI
-- Re-initialize Hand
-- change to "Execution" mode
+```
+python compapy
+```
 
-make sure the real-time kernel is used
-- `uname -a`
-
-in a terminal
-- `source_catkin`
-- `roslaunch`
-
-in 
-in programming mode, move a bit the robot away from its default pose
-prepare to interupt from the emergency button
-
-in pycharm
-- `compapy`
+### :joystick: API
 
 ## :+1: acknowledgements
 
