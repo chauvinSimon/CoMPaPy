@@ -1,6 +1,5 @@
 {
-    "name": "Garching_IX",
-    "elements": [
+    "obstacles": [
         {
             "name": "table",
             "type": "static_box",
@@ -12,7 +11,7 @@
             "size_z": "1.00"
         },
         {
-            "name": "Back_Wall",
+            "name": "back_wall",
             "type": "static_box",
             "x": "-0.7",
             "y": "-0.00",
@@ -22,7 +21,7 @@
             "size_z": "2.50"
         },
         {
-            "name": "ABB_yumi",
+            "name": "yumi",
             "type": "static_box",
             "x": "0.0",
             "y": "1.2",
@@ -32,7 +31,7 @@
             "size_z": "0.7"
         },
         {
-            "name": "ABB_yumi",
+            "name": "yumi",
             "type": "static_box",
             "x": "0.0",
             "y": "1.2",

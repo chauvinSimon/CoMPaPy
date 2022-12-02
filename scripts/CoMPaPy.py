@@ -23,13 +23,18 @@ def json_load(path: Path):
 
 
 class CoMPaPy(MoveGroupPythonInterfaceTutorial):
-    def __init__(self, scene_file: Path):
+    def __init__(self):
         super(CoMPaPy, self).__init__()
-        scene = json_load(scene_file)
-        for element in scene["elements"]:
-            self.add_scene_element(element)
 
-    def add_scene_element(self, element: Dict) -> None:
+        obstacles_file = Path('config/obstacles.json')  # todo: make it param
+        if not obstacles_file.exists():
+            raise FileExistsError(f'obstacles_file not found: [{obstacles_file}]\n'
+                                  f'did you run from [~/catkin_ws/src/compapy]?')
+        obstacles_data = json_load(obstacles_file)
+        for obstacle in obstacles_data['obstacles']:
+            self._add_scene_element(obstacle)
+
+    def _add_scene_element(self, element: Dict) -> None:
         box_name = element["name"]
 
         if element["type"] == "static_box":
@@ -49,9 +54,6 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
         else:
             raise NotImplementedError(f'cannot deal with element["type"]=[{element["type"]}]')
-
-    def cleanup_scene(self):
-        self.move_group.remove_all_elements()
 
     def move_j(self, target_pose: geometry_msgs.msg.Pose) -> bool:
         self.move_group.set_pose_target(target_pose)
@@ -192,51 +194,3 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
     def close_gripper(self):
         self._close_gripper()
-
-
-def main():
-    import copy
-
-    scene_file = Path('config/scene.json')
-    my_move_interface = CoMPaPy(scene_file=scene_file)
-
-    # gripper
-    my_move_interface.open_gripper()
-    my_move_interface.close_gripper()
-    my_move_interface.open_gripper()
-    my_move_interface.close_gripper()
-
-    # reach a ref position, stretching up
-    my_move_interface.go_to_joint_state()
-
-    # move inside a virtual cube
-    cube_size = 0.05
-    init_pose = my_move_interface.move_group.get_current_pose().pose
-    targets = []
-    # 1- along the internal "long" diagonal
-    target_1 = copy.deepcopy(init_pose)
-    target_1.position.x += cube_size
-    target_1.position.y += cube_size
-    target_1.position.z += cube_size
-    targets.append(target_1)
-
-    # 2- along the external diagonal of one face
-    target_2 = copy.deepcopy(init_pose)
-    target_2.position.y += cube_size
-    targets.append(target_2)
-
-    # 3- along the edge of one face, vertically
-    target_3 = copy.deepcopy(init_pose)
-    target_3.position.y += cube_size
-    target_3.position.z += cube_size
-    targets.append(target_3)
-
-    # 4- along the external diagonal of one face, back to the init
-    targets.append(init_pose)
-
-    for target_pose in targets:
-        my_move_interface.move_l(target_pose)
-
-
-if __name__ == '__main__':
-    main()
