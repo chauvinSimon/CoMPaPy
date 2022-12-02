@@ -226,6 +226,12 @@ sudo updatedb
 locate pycharm.sh
 ```
 
+I prefer to run python scripts from `pycharm` :blush:
+
+- `Working directory` is configured to be `~/catkin_ws/src/compapy`
+- if you prefer using the terminal, you may need to `export PYTHONPATH=${PYTHONPATH}:${PWD}`
+  against `ModuleNotFoundError` and `ModuleNotFoundError`
+
 ## :arrow_forward: starting real robot
 
 :warning: keep the emergency button close to you :rescue_worker_helmet:
@@ -331,27 +337,25 @@ rostopic pub --once /franka_gripper/move/goal franka_gripper/MoveActionGoal "goa
 
 ### :suspension_railway: `CoMPaPy` control
 
-```
-# either rviz only
-roslaunch compapy sim.launch
+_todo: make it work with sim.launch_
 
-# or on real robot (in execution mode)
+in `execution` mode
+
+```
 roslaunch compapy real.launch robot_ip:172.16.0.2
 ```
 
+in `pycharm`
+
 ```
-cd ~/catkin_ws/src_compapy
-
-# todo: do I need `export PYTHONPATH=${PYTHONPATH}:${PWD}`?
-
-(ven) python scripts/main_test_ref_actions.py
+python scripts/main_test_ref_actions.py
 ```
 
 ## :checkered_flag: usage
 
 ### :evergreen_tree: scene
 
-define obstacles in [`scene.json`](config/obstacles.json)
+define obstacles in [`obstacles.json`](config/obstacles.json)
 
 visualize them with
 
@@ -359,25 +363,21 @@ visualize them with
 roslaunch compapy sim.launch
 ```
 
-### todo
+### :joystick: example
+
+in `execution` mode
 
 ```
-# rviz only
-roslaunch compapy sim.launch
-
-# real robot (in execution mode)
 roslaunch compapy real.launch robot_ip:172.16.0.2
 ```
 
-:mag:
+adapt and run [`main_example.py`](scripts/main_example.py)
 
-in programming mode, move a bit the robot away from its default pose prepare to interrupt from the emergency button
+in `pycharm`
 
 ```
-python compapy
+python scripts/main_example.py
 ```
-
-### :joystick: API
 
 ## :+1: acknowledgements
 
