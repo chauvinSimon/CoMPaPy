@@ -125,7 +125,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         # todo: check that the robot's current joint state is within some tolerance of the first waypoint (current)
         self.move_group.execute(plan, wait=True)
 
-        success = True
+        success = True  # todo: find if success or not
         return success
 
     @staticmethod
@@ -194,3 +194,13 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
     def close_gripper(self):
         self._close_gripper()
+
+    def get_pose(self):
+        return self.move_group.get_current_pose().pose
+
+    def get_joints(self):
+        return self.move_group.get_current_joint_values()
+
+    def get_gripper_width_mm(self):
+        width = 0.1  # todo
+        return width
