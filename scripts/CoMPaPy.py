@@ -201,6 +201,16 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
     def get_joints(self):
         return self.move_group.get_current_joint_values()
 
-    def get_gripper_width_mm(self):
-        width = 0.1  # todo
-        return width
+    @staticmethod
+    def get_gripper_width_mm():
+        import rospy
+        from sensor_msgs.msg import JointState
+
+        msg = rospy.wait_for_message('/franka_gripper/joint_states', JointState, timeout=5)
+
+        assert msg.name == ['panda_finger_joint1', 'panda_finger_joint2'], f'[gripper] msg.name = {msg.name}'
+        joint_positions = msg.position
+        print(f'[gripper] joint_positions = {joint_positions}')
+        width_mm = 100 * sum(joint_positions)
+
+        return width_mm
