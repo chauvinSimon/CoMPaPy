@@ -211,6 +211,6 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         assert msg.name == ['panda_finger_joint1', 'panda_finger_joint2'], f'[gripper] msg.name = {msg.name}'
         joint_positions = msg.position
         print(f'[gripper] joint_positions = {joint_positions}')
-        width_mm = 100 * sum(joint_positions)
+        width_mm = 1000 * sum(joint_positions)
 
         return width_mm
