@@ -45,6 +45,12 @@ def execute_ref_actions():
     for target_pose in targets:
         compapy.move_l(target_pose)
 
+    # some "not too stretched" pose
+    target_pose = compapy.move_group.get_current_pose().pose
+    target_pose.position.x += 0.3
+    target_pose.position.z -= 0.3
+    compapy.move_l(target_pose)
+
     # rotations of the gripper
     init_pose = compapy.move_group.get_current_pose().pose
     for q in [
