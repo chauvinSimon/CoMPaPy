@@ -4,14 +4,6 @@
 
 - :construction: _work in progress_ :construction_worker:
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Last commit](https://img.shields.io/github/last-commit/chauvinSimon/compapy.svg?style=flat)](https://github.com/chauvinSimon/compapy/commits)
-[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/chauvinSimon/compapy)](https://github.com/chauvinSimon/compapy/commits)
-[![Github Stars](https://img.shields.io/github/stars/chauvinSimon/compapy?style=flat&logo=github)](https://github.com/chauvinSimon/compapy/stargazers)
-[![Github Forks](https://img.shields.io/github/forks/chauvinSimon/compapy?style=flat&logo=github)](https://github.com/chauvinSimon/compapy/network/members)
-[![Github Watchers](https://img.shields.io/github/watchers/chauvinSimon/compapy?style=flat&logo=github)](https://github.com/chauvinSimon/compapy)
-[![GitHub contributors](https://img.shields.io/github/contributors/chauvinSimon/compapy)](https://github.com/chauvinSimon/compapy/graphs/contributors)
-
 # `CoMPaPy`
 
 ## :eyeglasses: description
@@ -21,14 +13,14 @@ with [moveit](https://ros-planning.github.io/moveit_tutorials/doc/getting_starte
 
 - using only **official** and **maintained** repos: [`franka_ros`](https://frankaemika.github.io/docs/franka_ros.html)
   and [`MoveIt`](https://ros-planning.github.io/moveit_tutorials/doc/getting_started/getting_started.html)
-- both for "`rviz` only" and "real panda"
+- two modes: "`rviz` only" and "real panda"
 - no `cpp`, just `python`
 
 ## :warning: limitations
 
 - rely on `ROS` :confused:
 - only tested on the following combination
-    - (`ubuntu 20`, `noetic`, `fr3`, `libfranka 0.10.0`, `franka_ros 0.10.1`)
+    - (`ubuntu 20`, `noetic`, `libfranka 0.10.0`, `franka_ros 0.10.1`)
     - _todo: docker_
 - require switching to a real-time kernel
 - require lots of installations
@@ -184,6 +176,15 @@ follow [these instructions](https://ros-planning.github.io/moveit_tutorials/doc/
 
 - prefer `~/catkin_ws/src` to `~/ws_moveit/src`
 
+##### :cartwheeling: `compapy`
+
+```
+cd ~/catkin_ws/src
+git clone https://github.com/chauvinSimon/compapy.git
+cd ~/catkin_ws/
+catkin build
+```
+
 #### :performing_arts: `venv`
 
 ```
@@ -211,10 +212,10 @@ alias source_catkin="source ~/catkin_ws/devel/setup.bash; source ~/catkin_ws/src
 follow [this great video](https://www.youtube.com/watch?v=lTew9mbXrAs) (Peter Mitrano)
 
 ```
-cd ~/catkin_ws
-python3 -m venv ven --system-site-packages
-source ven/bin/activate
+source ~/catkin_ws/src/ven/bin/activate
 python -c "import ros; print(ros.__file__)"
+
+# if not using the alias
 source ~/catkin_ws/devel/setup.sh
 ```
 
@@ -255,6 +256,12 @@ in a terminal
 
 _todo: test them all again_
 
+### :phone: robot connection
+
+```
+ping 172.16.0.2
+```
+
 ### :video_game: `move group` python Interface
 
 no real robot needed: follow
@@ -278,8 +285,9 @@ in `execution` mode
 in `execution` mode
 
 ```
-roslaunch franka_visualization franka_visualization.launch robot_ip:=172.16.0.2 load_gripper:=true robot:=fr3
+roslaunch franka_visualization franka_visualization.launch robot_ip:=172.16.0.2 load_gripper:=true
 
+# move a bit the gripper from its start pose before running this
 roslaunch franka_example_controllers move_to_start.launch robot_ip:=172.16.0.2
 ```
 
@@ -288,7 +296,7 @@ roslaunch franka_example_controllers move_to_start.launch robot_ip:=172.16.0.2
 in `programming` mode
 
 ```
-roslaunch franka_visualization franka_visualization.launch robot_ip:=172.16.0.2 load_gripper:=true robot:=fr3
+roslaunch franka_visualization franka_visualization.launch robot_ip:=172.16.0.2 load_gripper:=true
 ```
 
 - move the cooperative robot manually (press the two buttons on the gripper)
@@ -299,7 +307,7 @@ roslaunch franka_visualization franka_visualization.launch robot_ip:=172.16.0.2 
 in `execution` mode
 
 ```
-roslaunch panda_moveit_config franka_control.launch robot_ip:=172.16.0.2 load_gripper:=true robot:=fr3
+roslaunch panda_moveit_config franka_control.launch robot_ip:=172.16.0.2 load_gripper:=true
 ```
 
 in `rviz`:
@@ -320,9 +328,7 @@ in `execution` mode
 roslaunch franka_gripper franka_gripper.launch robot_ip:=172.16.0.2
 roslaunch franka_control franka_control.launch robot_ip:=172.16.0.2
 roslaunch panda_moveit_config franka_control.launch robot_ip:=172.16.0.2 load_gripper:=true
-roslaunch compapy real.launch robot_ip:172.16.0.2
-
-# todo: is `robot:=fr3` needed?
+roslaunch compapy real.launch robot_ip:=172.16.0.2
 ```
 
 then
@@ -345,7 +351,7 @@ in `execution` mode
 roslaunch compapy real.launch robot_ip:172.16.0.2
 ```
 
-in `pycharm`
+in `pycharm`, with `Working directory` set to `~/catkin_ws/src/compapy`
 
 ```
 python scripts/main_test_ref_actions.py
@@ -373,7 +379,7 @@ roslaunch compapy real.launch robot_ip:172.16.0.2
 
 adapt and run [`main_example.py`](scripts/main_example.py)
 
-in `pycharm`
+in `pycharm`, with `Working directory` set to `~/catkin_ws/src/compapy`
 
 ```
 python scripts/main_example.py
