@@ -339,6 +339,12 @@ roslaunch panda_moveit_config franka_control.launch robot_ip:=172.16.0.2 load_gr
 roslaunch compapy real.launch robot_ip:=172.16.0.2
 ```
 
+alternatively to the real robot, `gazebo` can be used
+
+```
+roslaunch panda_moveit_config gazebo.launch
+```
+
 then
 
 ```
@@ -348,6 +354,13 @@ rostopic pub --once /franka_gripper/grasp/goal franka_gripper/GraspActionGoal "g
 # open the gripper
 rostopic pub --once /franka_gripper/move/goal franka_gripper/MoveActionGoal "goal: { width: 0.08, speed: 0.1 }"
 ```
+
+<details>
+  <summary>:heavy_check_mark: expected result</summary>
+
+![gripper.gif](media/gripper.gif)
+
+</details>
 
 #### :performing_arts: gazebo
 
@@ -384,6 +397,13 @@ in `pycharm`, with `Working directory` set to `~/catkin_ws/src/compapy`
 ```
 python scripts/main_test_ref_actions.py
 ```
+
+<details>
+  <summary>:heavy_check_mark: expected result</summary>
+
+![compapy_ref_moves.gif](media/compapy_ref_moves.gif)
+
+</details>
 
 ## :checkered_flag: usage
 
