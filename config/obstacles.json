@@ -1,64 +1,74 @@
 {
-    "obstacles": [
-        {
-            "name": "table",
-            "type": "static_box",
-            "x": "0.30",
-            "y": "0.70",
-            "z": "-0.50",
-            "size_x": "2.00",
-            "size_y": "1.90",
-            "size_z": "1.00"
-        },
-        {
-            "name": "back_wall",
-            "type": "static_box",
-            "x": "-0.7",
-            "y": "-0.00",
-            "z": "0.00",
-            "size_x": "0.10",
-            "size_y": "2.90",
-            "size_z": "2.50"
-        },
-        {
-            "name": "yumi",
-            "type": "static_box",
-            "x": "0.0",
-            "y": "1.2",
-            "z": "0.3",
-            "size_x": "0.7",
-            "size_y": "0.45",
-            "size_z": "0.7"
-        },
-        {
-            "name": "yumi",
-            "type": "static_box",
-            "x": "0.0",
-            "y": "1.2",
-            "z": "0.3",
-            "size_x": "0.7",
-            "size_y": "0.45",
-            "size_z": "0.7"
-        },
-        {
-            "name": "conv_belt",
-            "type": "static_box",
-            "x": "0.60",
-            "y": "0.25",
-            "z": "0.02",
-            "size_x": "1.0",
-            "size_y": "1.0",
-            "size_z": "0.05"
-        },
-        {
-            "name": "tv",
-            "type": "static_box",
-            "x": "-0.50",
-            "y": "0.7",
-            "z": "1.4",
-            "size_x": "0.35",
-            "size_y": "1.0",
-            "size_z": "1.0"
-        }
-    ]
+  "obstacles": [
+    {
+      "name": "table",
+      "type": "static_box",
+      "x": "0.30",
+      "y": "0.70",
+      "z": "-0.50",
+      "size_x": "2.00",
+      "size_y": "1.90",
+      "size_z": "1.00"
+    },
+    {
+      "name": "back_wall",
+      "type": "static_box",
+      "x": "-0.7",
+      "y": "-0.00",
+      "z": "0.00",
+      "size_x": "0.10",
+      "size_y": "2.90",
+      "size_z": "2.50"
+    },
+    {
+      "name": "yumi",
+      "type": "static_box",
+      "x": "0.0",
+      "y": "1.2",
+      "z": "0.3",
+      "size_x": "0.7",
+      "size_y": "0.45",
+      "size_z": "0.7"
+    },
+    {
+      "name": "conv_belt",
+      "type": "static_box",
+      "x": "0.60",
+      "y": "0.25",
+      "z": "0.02",
+      "size_x": "1.0",
+      "size_y": "1.0",
+      "size_z": "0.05"
+    },
+    {
+      "name": "tv",
+      "type": "static_box",
+      "x": "-0.50",
+      "y": "0.7",
+      "z": "1.4",
+      "size_x": "0.35",
+      "size_y": "1.0",
+      "size_z": "1.0"
+    },
+    {
+      "name": "amr",
+      "type": "static_box",
+      "x": "-0.15",
+      "y": "-0.5",
+      "z": "-0.51",
+      "size_x": "0.4",
+      "size_y": "0.3",
+      "size_z": "0.2"
+    },
+    {
+      "name": "cam",
+      "type": "static_box",
+      "x": "-0.125",
+      "y": "-0.28",
+      "z": "0.015",
+      "size_x": "0.15",
+      "size_y": "0.2",
+      "size_z": "0.2"
+    }
+  ]
 }
