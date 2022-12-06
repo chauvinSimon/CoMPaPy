@@ -274,7 +274,7 @@ rosrun moveit_tutorials move_group_python_interface_tutorial.py
 ```
 
 <details>
-  <summary>expected result</summary>
+  <summary>:heavy_check_mark: expected result</summary>
 
 ![py_tuto_rviz](media/py_tuto_rviz.gif)
 
@@ -349,7 +349,7 @@ rostopic pub --once /franka_gripper/grasp/goal franka_gripper/GraspActionGoal "g
 rostopic pub --once /franka_gripper/move/goal franka_gripper/MoveActionGoal "goal: { width: 0.08, speed: 0.1 }"
 ```
 
-#### gazebo
+#### :performing_arts: gazebo
 
 ```
 roslaunch panda_moveit_config gazebo.launch
@@ -363,7 +363,7 @@ rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 ```
 
 <details>
-  <summary>expected result</summary>
+  <summary>:heavy_check_mark: expected result</summary>
 
 ![gazebo_rqt.gif](media/gazebo_rqt.gif)
 
@@ -404,7 +404,7 @@ python scripts/main_load_obstacles.py
 ```
 
 <details>
-  <summary>expected result</summary>
+  <summary>:heavy_check_mark: expected result</summary>
 
 ![obstacles.gif](media/obstacles.gif)
 
