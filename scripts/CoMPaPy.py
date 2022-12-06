@@ -6,11 +6,13 @@
 import actionlib
 import franka_gripper.msg
 import geometry_msgs
+from compapy.scripts.utils import setup_logger
 from geometry_msgs.msg import Pose
 import json
 import moveit_msgs.msg
 import numpy as np
 from pathlib import Path
+import time
 from typing import Dict
 
 from moveit_tutorials.doc.move_group_python_interface.scripts.move_group_python_interface_tutorial import \
@@ -25,6 +27,10 @@ def json_load(path: Path):
 class CoMPaPy(MoveGroupPythonInterfaceTutorial):
     def __init__(self):
         super(CoMPaPy, self).__init__()
+
+        saving_dir = Path('logs') / str(time.strftime("%Y%m%d_%H%M%S"))
+        saving_dir.mkdir(exist_ok=True, parents=True)
+        self.logger = setup_logger(self.__class__.__name__, log_file=saving_dir / 'log.log')
 
         obstacles_file = Path('config/obstacles.json')  # todo: make it param
         if not obstacles_file.exists():
@@ -74,7 +80,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             target_pose.position.y - start.position.y,
             target_pose.position.z - start.position.z,
         ])
-        print(f'want to travel [{distance * 100:.1f} cm]')
+        self.logger.info(f'want to travel [{distance * 100:.1f} cm]')
 
         waypoints = [
             target_pose,
@@ -104,16 +110,22 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             #  large unpredictable motions of redundant joints and could be a safety issue
             jump_threshold=5.0,
 
-            # avoid_collisions=True
+            # avoid_collisions=True  # todo: understand. collision wrt robot or wrt scene-obstacles?
         )
 
-        print(f'[{fraction:.1%}] = fraction of the path achieved as described by the waypoints')
+        self.logger.info(f'[{fraction:.1%}] = fraction of the path achieved as described by the waypoints')
         if fraction == -1.0:
-            print('error with compute_cartesian_path')
+            self.logger.error('error with compute_cartesian_path')
+            # todo: fallback
+
         else:
             n_points = len(plan.joint_trajectory.points)
-            print(f'[{n_points}] points (resolution_m = {resolution_m * 100:.1f} cm) -> '
-                  f'path.length at most {n_points * resolution_m * 100:.1f} cm')
+            self.logger.info(f'[{n_points}] points (resolution_m = {resolution_m * 100:.1f} cm) -> '
+                             f'path.length at most {n_points * resolution_m * 100:.1f} cm')
+            if fraction < 1.0:
+                self.logger.warning('path not complete')
+                # todo: fallback
+
         # Note: we are just planning, not asking move_group to actually move the robot yet
 
         # display a saved trajectory
@@ -201,16 +213,19 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
     def get_joints(self):
         return self.move_group.get_current_joint_values()
 
-    @staticmethod
-    def get_gripper_width_mm():
+    def get_gripper_width_mm(self):
         import rospy
         from sensor_msgs.msg import JointState
 
         msg = rospy.wait_for_message('/franka_gripper/joint_states', JointState, timeout=5)
 
-        assert msg.name == ['panda_finger_joint1', 'panda_finger_joint2'], f'[gripper] msg.name = {msg.name}'
+        if msg.name != ['panda_finger_joint1', 'panda_finger_joint2']:
+            self.logger.error(f'[gripper] msg.name = {msg.name}')
+
         joint_positions = msg.position
-        print(f'[gripper] joint_positions = {joint_positions}')
+        self.logger.info(f'[gripper] joint_positions = {joint_positions}')
+
+        # as strange as it can be, "width" can be directly derived from the two joint angles
         width_mm = 1000 * sum(joint_positions)
 
         return width_mm
