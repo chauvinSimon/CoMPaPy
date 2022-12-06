@@ -6,7 +6,7 @@
 import actionlib
 import franka_gripper.msg
 import geometry_msgs
-from compapy.scripts.utils import setup_logger
+from compapy.scripts.utils import setup_logger, read_yaml
 from geometry_msgs.msg import Pose
 import json
 import moveit_msgs.msg
@@ -31,6 +31,8 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         saving_dir = Path('logs') / str(time.strftime("%Y%m%d_%H%M%S"))
         saving_dir.mkdir(exist_ok=True, parents=True)
         self.logger = setup_logger(self.__class__.__name__, log_file=saving_dir / 'log.log')
+
+        self.config = read_yaml(Path('config/compapy.yaml'))
 
         obstacles_file = Path('config/obstacles.json')  # todo: make it param
         if not obstacles_file.exists():
@@ -63,7 +65,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
     def move_j(self, target_pose: geometry_msgs.msg.Pose) -> bool:
         self.move_group.set_pose_target(target_pose)
-        success = self.move_group.go(wait=True)
+        success = self.move_group.go(wait=True)  # todo: how to set speed?
 
         self.move_group.stop()  # ensures that there is no residual movement
         self.move_group.clear_pose_targets()
@@ -86,12 +88,14 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             target_pose,
         ]
 
+        self.move_group.limit_max_cartesian_link_speed(
+            speed=self.config['move_l']['speed']
+        )
+
         # todo: tune it
         #  "The computed trajectory is too short to detect jumps in joint-space Need at least 10 steps,
         #   only got 3. Try a lower max_step."
-        resolution_m = 0.005
-
-        self.move_group.limit_max_cartesian_link_speed(speed=0.05)
+        resolution_m = self.config['move_l']['resolution_m']
 
         # takes as input waypoints of end effector poses, and outputs a joint trajectory that visits each pose
         (plan, fraction) = self.move_group.compute_cartesian_path(
@@ -108,7 +112,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             # todo: enable jump_threshold (not 0.0), to check for infeasible jumps in joint space
             #  disabling the jump threshold while operating real hardware can cause
             #  large unpredictable motions of redundant joints and could be a safety issue
-            jump_threshold=5.0,
+            jump_threshold=self.config['move_l']['jump_threshold'],
 
             # avoid_collisions=True  # todo: understand. collision wrt robot or wrt scene-obstacles?
         )
@@ -140,19 +144,15 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         success = True  # todo: find if success or not
         return success
 
-    @staticmethod
-    def _open_gripper(
-            width=0.08,
-            speed=0.4
-    ):
+    def open_gripper(self):
         # Initialize actionLib client
         move_client = actionlib.SimpleActionClient('/franka_gripper/move', franka_gripper.msg.MoveAction)
         move_client.wait_for_server()
 
         # Creates a goal to send to the action server.
         goal = franka_gripper.msg.MoveGoal()
-        goal.width = width
-        goal.speed = speed
+        goal.width = self.config['open_gripper']['width']
+        goal.speed = self.config['open_gripper']['speed']
 
         # Sends the goal to the action server.
         move_client.send_goal(goal)
@@ -164,32 +164,18 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         result = move_client.get_result()
         return result.success
 
-    @staticmethod
-    def _close_gripper(
-            width=0.05,
-            epsilon_inner=0.01,
-            epsilon_outer=0.01,
-            force=20,
-            speed=0.1,
-    ):
-        # todo: compare with https://github.com/frankaemika/franka_ros/issues/256
-        # goal.width = 0.022
-        # goal.epsilon.inner = 0.005
-        # goal.epsilon.outer = 0.005
-        # goal.speed = 0.1
-        # goal.force = 5
-
+    def close_gripper(self):
         # Initialize actionLib client
         grasp_client = actionlib.SimpleActionClient('/franka_gripper/grasp', franka_gripper.msg.GraspAction)
         grasp_client.wait_for_server()
 
         # Creates a goal to send to the action server.
         goal = franka_gripper.msg.GraspGoal()
-        goal.width = width
-        goal.epsilon.inner = epsilon_inner
-        goal.epsilon.outer = epsilon_outer
-        goal.speed = speed
-        goal.force = force
+        goal.width = self.config['close_gripper']['width']
+        goal.epsilon.inner = self.config['close_gripper']['epsilon_inner']
+        goal.epsilon.outer = self.config['close_gripper']['epsilon_outer']
+        goal.speed = self.config['close_gripper']['speed']
+        goal.force = self.config['close_gripper']['force']
 
         # Sends the goal to the action server.
         grasp_client.send_goal(goal)
@@ -200,12 +186,6 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         # Prints out the result of executing the action
         result = grasp_client.get_result()
         return result.success
-
-    def open_gripper(self):
-        self._open_gripper()
-
-    def close_gripper(self):
-        self._close_gripper()
 
     def get_pose(self):
         return self.move_group.get_current_pose().pose

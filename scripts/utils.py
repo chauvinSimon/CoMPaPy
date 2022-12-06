@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+import yaml
 
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
@@ -23,7 +24,14 @@ def setup_logger(name: str, log_file: Path, level=logging.INFO):
     return logger
 
 
-def example():
+def read_yaml(p: Path):
+    if not p.exists():
+        raise FileExistsError(f'{p} does not exist')
+    with p.open("r") as stream:
+        return yaml.safe_load(stream)
+
+
+def log_example():
     # first file logger
     logger = setup_logger('first_logger', Path('logs/first_logfile.log'))
     logger.info('This is just info message')
@@ -34,4 +42,4 @@ def example():
 
 
 if __name__ == '__main__':
-    example()
+    log_example()

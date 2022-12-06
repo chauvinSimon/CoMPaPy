@@ -1,0 +1,21 @@
+move_l:
+  resolution_m: 0.005
+  speed: 0.05
+  jump_threshold: 5.0
+
+open_gripper:
+  width: 0.08
+  speed: 0.4
+
+close_gripper:
+  # todo: compare with https://github.com/frankaemika/franka_ros/issues/256
+  # goal.width = 0.022
+  # goal.epsilon.inner = 0.005
+  # goal.epsilon.outer = 0.005
+  # goal.speed = 0.1
+  # goal.force = 5
+  width: 0.05
+  epsilon_inner: 0.01
+  epsilon_outer: 0.01
+  speed: 0.1
+  force: 20
