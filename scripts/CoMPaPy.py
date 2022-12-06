@@ -13,7 +13,7 @@ import moveit_msgs.msg
 import numpy as np
 from pathlib import Path
 import time
-from typing import Dict
+from typing import Dict, Optional
 
 from moveit_tutorials.doc.move_group_python_interface.scripts.move_group_python_interface_tutorial import \
     MoveGroupPythonInterfaceTutorial
@@ -25,12 +25,14 @@ def json_load(path: Path):
 
 
 class CoMPaPy(MoveGroupPythonInterfaceTutorial):
-    def __init__(self):
+    def __init__(self, log_file: Optional[Path] = None):
         super(CoMPaPy, self).__init__()
 
-        saving_dir = Path('logs') / str(time.strftime("%Y%m%d_%H%M%S"))
-        saving_dir.mkdir(exist_ok=True, parents=True)
-        self.logger = setup_logger(self.__class__.__name__, log_file=saving_dir / 'log.log')
+        if log_file is None:
+            saving_dir = Path('logs') / str(time.strftime("%Y%m%d_%H%M%S"))
+            saving_dir.mkdir(exist_ok=True, parents=True)
+            log_file = saving_dir / 'log.log'
+        self.logger = setup_logger(self.__class__.__name__, log_file=log_file)
 
         self.config = read_yaml(Path('config/compapy.yaml'))
 
