@@ -370,6 +370,12 @@ visualize them with
 roslaunch compapy sim.launch
 ```
 
+in `pycharm`, with `Working directory` set to `~/catkin_ws/src/compapy`
+
+```
+python scripts/main_load_obstacles.py
+```
+
 ### :joystick: example
 
 in `execution` mode
