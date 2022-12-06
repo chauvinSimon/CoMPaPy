@@ -191,6 +191,7 @@ catkin build
 cd ~/catkin_ws/src
 python3 -m venv ven --system-site-packages
 source ven/bin/activate
+pip install -r requirements.txt
 ```
 
 #### :pencil2: `source_catkin` alias in `~/.bashrc`
