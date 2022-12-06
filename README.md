@@ -362,7 +362,7 @@ rostopic pub --once /franka_gripper/move/goal franka_gripper/MoveActionGoal "goa
 
 </details>
 
-#### :performing_arts: gazebo
+### :performing_arts: gazebo
 
 ```
 roslaunch panda_moveit_config gazebo.launch
