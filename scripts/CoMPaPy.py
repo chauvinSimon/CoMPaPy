@@ -72,6 +72,8 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         self.move_group.stop()  # ensures that there is no residual movement
         self.move_group.clear_pose_targets()
 
+        self.compute_move_error(target_pose=target_pose, move_name='move_j')
+
         return success
 
     def move_l(self, target_pose: geometry_msgs.msg.Pose) -> bool:
@@ -129,7 +131,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             self.logger.info(f'[{n_points}] points (resolution_m = {resolution_m * 100:.1f} cm) -> '
                              f'path.length at most {n_points * resolution_m * 100:.1f} cm')
             if fraction < 1.0:
-                self.logger.warning('path not complete')
+                self.logger.error('path not complete')
                 # todo: fallback
 
         # Note: we are just planning, not asking move_group to actually move the robot yet
@@ -140,13 +142,33 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         display_trajectory.trajectory.append(plan)
         self.display_trajectory_publisher.publish(display_trajectory)
 
-        # todo: check that the robot's current joint state is within some tolerance of the first waypoint (current)
-        self.move_group.execute(plan, wait=True)
+        success = self.move_group.execute(plan, wait=True)
+        # todo: this prints sometimes 'ABORTED: CONTROL_FAILED'
 
-        success = True  # todo: find if success or not
+        self.compute_move_error(target_pose=target_pose, move_name='move_l')
+
         return success
 
-    def open_gripper(self):
+    def compute_move_error(self, target_pose: geometry_msgs.msg.Pose, move_name: str) -> None:
+        current_p = self.get_pose()
+
+        target_pose_position = np.array([target_pose.position.x, target_pose.position.y, target_pose.position.z])
+        l8_pose_position = np.array([current_p.position.x, current_p.position.y, current_p.position.z])
+        delta_cm = 100 * np.linalg.norm((target_pose_position - l8_pose_position))
+        self.logger.info(f'after [{move_name}]: delta = [{delta_cm:0.2f} cm]')
+
+        target_pose_orientation = np.array([target_pose.orientation.w, target_pose.orientation.x, target_pose.orientation.y, target_pose.orientation.z])
+        l8_pose_orientation = np.array([current_p.orientation.w, current_p.orientation.x, current_p.orientation.y, current_p.orientation.z])
+        delta_q = np.linalg.norm((target_pose_orientation - l8_pose_orientation))
+        self.logger.info(f'after [{move_name}]: delta_q = [{delta_q:0.3f}]')
+
+        if delta_cm > 1.0:
+            self.logger.error(f'after [{move_name}]: delta_cm = [{delta_cm:.2f} cm] between target and current pose')
+
+        if delta_q > 0.1:
+            self.logger.error(f'after [{move_name}]: delta_q = [{delta_q:.3f} cm] between target and current pose')
+
+    def open_gripper(self) -> bool:
         # Initialize actionLib client
         move_client = actionlib.SimpleActionClient('/franka_gripper/move', franka_gripper.msg.MoveAction)
         move_client.wait_for_server()
@@ -166,7 +188,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         result = move_client.get_result()
         return result.success
 
-    def close_gripper(self):
+    def close_gripper(self) -> bool:
         # Initialize actionLib client
         grasp_client = actionlib.SimpleActionClient('/franka_gripper/grasp', franka_gripper.msg.GraspAction)
         grasp_client.wait_for_server()
