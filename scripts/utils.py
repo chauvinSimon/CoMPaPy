@@ -2,14 +2,14 @@ import logging
 from pathlib import Path
 import yaml
 
-formatter = logging.Formatter('%(levelname)s - %(asctime)s - %(message)s')
+formatter = logging.Formatter('%(levelname)s - %(asctime)s - %(module)s: %(message)s')
 
 
 # todo: in pycharm, set format pattern to
 #   ^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2},\d{3})\s(\S*)\s*(\w*)\s*(.*)$
 
 
-def setup_logger(name: str, log_file: Path, level=logging.INFO):
+def setup_logger(name: str, log_file: Path, level=logging.DEBUG):
     print(f'logging [{name}] at [{log_file}]')
 
     log_file.parent.mkdir(exist_ok=True, parents=True)
@@ -22,7 +22,7 @@ def setup_logger(name: str, log_file: Path, level=logging.INFO):
     logger.addHandler(handler)
 
     ch = logging.StreamHandler()
-    ch.setLevel(logging.INFO)
+    ch.setLevel(logging.DEBUG)
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
