@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 import yaml
 
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+formatter = logging.Formatter('%(levelname)s - %(asctime)s - %(message)s')
 
 
 # todo: in pycharm, set format pattern to
@@ -20,6 +20,11 @@ def setup_logger(name: str, log_file: Path, level=logging.INFO):
     logger = logging.getLogger(name)
     logger.setLevel(level)
     logger.addHandler(handler)
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
 
     return logger
 
