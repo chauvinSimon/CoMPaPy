@@ -342,7 +342,7 @@ roslaunch compapy real.launch robot_ip:=172.16.0.2
 alternatively to the real robot, `gazebo` can be used
 
 ```
-roslaunch panda_moveit_config gazebo.launch
+roslaunch panda_moveit_config demo_gazebo.launch
 ```
 
 then
