@@ -36,7 +36,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
         self.config = read_yaml(Path('config/compapy.yaml'))
 
-        obstacles_file = Path('config/obstacles.json')  # todo: make it param
+        obstacles_file = Path(self.config['obstacles']['config_path'])
         if not obstacles_file.exists():
             raise FileExistsError(f'obstacles_file not found: [{obstacles_file}]\n'
                                   f'did you run from [~/catkin_ws/src/compapy]?')
