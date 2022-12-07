@@ -1,8 +1,5 @@
 #! /usr/bin/env python3
 
-# todo: make a node from it instead of running it?
-#  with a callback and some spin()
-
 import actionlib
 import franka_gripper.msg
 import geometry_msgs
@@ -12,6 +9,8 @@ import json
 import moveit_msgs.msg
 import numpy as np
 from pathlib import Path
+import rospy
+from sensor_msgs.msg import JointState
 import time
 from typing import Dict, Optional
 
@@ -72,7 +71,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         self.move_group.stop()  # ensures that there is no residual movement
         self.move_group.clear_pose_targets()
 
-        self.compute_move_error(target_pose=target_pose, move_name='move_j')
+        self._compute_move_error(target_pose=target_pose, move_name='move_j')
 
         return success
 
@@ -145,11 +144,11 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         success = self.move_group.execute(plan, wait=True)
         # todo: this prints sometimes 'ABORTED: CONTROL_FAILED'
 
-        self.compute_move_error(target_pose=target_pose, move_name='move_l')
+        self._compute_move_error(target_pose=target_pose, move_name='move_l')
 
         return success
 
-    def compute_move_error(self, target_pose: geometry_msgs.msg.Pose, move_name: str) -> None:
+    def _compute_move_error(self, target_pose: geometry_msgs.msg.Pose, move_name: str) -> None:
         current_p = self.get_pose()
 
         target_pose_position = np.array([target_pose.position.x, target_pose.position.y, target_pose.position.z])
@@ -218,9 +217,6 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         return self.move_group.get_current_joint_values()
 
     def get_gripper_width_mm(self):
-        import rospy
-        from sensor_msgs.msg import JointState
-
         msg = rospy.wait_for_message('/franka_gripper/joint_states', JointState, timeout=5)
 
         if msg.name != ['panda_finger_joint1', 'panda_finger_joint2']:
