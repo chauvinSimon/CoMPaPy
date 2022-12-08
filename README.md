@@ -288,6 +288,13 @@ in `execution` mode
 ~/libfranka/build/examples/communication_test 172.16.0.2
 ```
 
+<details>
+  <summary>:heavy_check_mark: expected result</summary>
+
+![libfranka.gif](media/libfranka.gif)
+
+</details>
+
 ### :popcorn: `franka_example_controllers`
 
 in `execution` mode
@@ -365,7 +372,7 @@ rostopic pub --once /franka_gripper/move/goal franka_gripper/MoveActionGoal "goa
 ### :performing_arts: gazebo
 
 ```
-roslaunch panda_moveit_config gazebo.launch
+roslaunch panda_moveit_config demo_gazebo.launch
 ```
 
 install and run `rqt_joint_trajectory_controller`
@@ -374,6 +381,8 @@ install and run `rqt_joint_trajectory_controller`
 sudo apt install ros-noetic-rqt-joint-trajectory-controller
 rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 ```
+
+in the two drop down options select `/controller_manager` and `effort_joint_trajectory_contoller`
 
 <details>
   <summary>:heavy_check_mark: expected result</summary>
@@ -389,7 +398,7 @@ _todo: make it work with sim.launch_
 in `execution` mode
 
 ```
-roslaunch compapy real.launch robot_ip:172.16.0.2
+roslaunch compapy real.launch robot_ip:=172.16.0.2
 ```
 
 in `pycharm`, with `Working directory` set to `~/catkin_ws/src/compapy`
@@ -435,7 +444,7 @@ python scripts/main_load_obstacles.py
 in `execution` mode
 
 ```
-roslaunch compapy real.launch robot_ip:172.16.0.2
+roslaunch compapy real.launch robot_ip:=172.16.0.2
 ```
 
 adapt and run [`main_example.py`](scripts/main_example.py)
