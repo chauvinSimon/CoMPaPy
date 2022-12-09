@@ -30,7 +30,7 @@ def main():
         while True:
             data = s.recv(1024)
             data = data.decode('utf-8')
-            logger.info(f'\nreceived {data!r}')
+            logger.info(f'received {data!r}')
             success = False
             if data == '>exit<':
                 logger.info('closing client socket - bye')
@@ -108,7 +108,7 @@ def main():
             l8_in_base_out[1] = l8_pose.position.y
             l8_in_base_out[2] = l8_pose.position.z
 
-            logger.debug('\nreading out values')
+            logger.debug('reading out values')
             logger.debug(f'l8_in_base_out = {[round(e, 2) for e in l8_in_base_out[:3]]}')
 
             # todo: directly from quat to rotvec
