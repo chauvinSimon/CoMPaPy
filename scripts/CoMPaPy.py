@@ -48,15 +48,15 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
         if element["type"] == "static_box":
             box_pose = geometry_msgs.msg.PoseStamped()
-            box_pose.pose.position.x = float(element["x"])
-            box_pose.pose.position.y = float(element["y"])
-            box_pose.pose.position.z = float(element["z"])
+            box_pose.pose.position.x = element["x"]
+            box_pose.pose.position.y = element["y"]
+            box_pose.pose.position.z = element["z"]
             box_pose.header.frame_id = "panda_link0"
 
             box_size = (
-                float(element["size_x"]),
-                float(element["size_y"]),
-                float(element["size_z"])
+                element["size_x"],
+                element["size_y"],
+                element["size_z"]
             )
             self.scene.add_box(name=box_name, pose=box_pose, size=box_size)
             # todo: wait_for_state_update
