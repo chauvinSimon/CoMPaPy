@@ -48,6 +48,11 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         for obstacle in obstacles_data['obstacles']:
             self._add_scene_element(obstacle)
 
+        self.logger.info('joint bounds:')
+        for j_name in self.robot.get_joint_names():
+            j = self.robot.get_joint(j_name)
+            self.logger.info(f'\t{j_name}: {j.bounds()}')
+
     def _add_scene_element(self, element: Dict) -> None:
         box_name = element["name"]
 
