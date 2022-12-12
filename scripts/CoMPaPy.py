@@ -71,7 +71,10 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
     def move_j(self, target_pose: geometry_msgs.msg.Pose) -> bool:
         self.move_group.set_pose_target(target_pose)
-        success = self.move_group.go(wait=True)  # todo: how to set speed?
+
+        # todo: how to set speed?
+        #  self.move_group.set_max_velocity_scaling_factor()
+        success = self.move_group.go(wait=True)
 
         self.move_group.stop()  # ensures that there is no residual movement
         self.move_group.clear_pose_targets()
@@ -111,6 +114,8 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             target_pose,
         ]
 
+        # todo: add constraints
+        #  https://github.com/ros-planning/moveit_tutorials/pull/518/files#diff-77946a0e5e0e873f97288add4d30861477c31fa4528736e414a0903fbaa9c438
         self.move_group.limit_max_cartesian_link_speed(
             speed=self.config['move_l']['speed']
         )
@@ -122,6 +127,9 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             # configurations are computed for every eef_step meters
             # it should be a step size of at most `eef_step` meters between end effector configurations
             #   of consecutive points in the result trajectory
+            # todo: tune it
+            #  "The computed trajectory is too short to detect jumps in joint-space Need at least 10 steps,
+            #   only got 3. Try a lower max_step."
             eef_step=resolution_m,
 
             # jump_threshold against joint flips (cannot continue following the waypoints without reorienting the arm)
