@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import json
 import logging
 import os
@@ -8,6 +9,8 @@ import yaml
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Quaternion
+from moveit_msgs.msg import RobotTrajectory
+from trajectory_msgs.msg import JointTrajectoryPoint
 
 formatter = logging.Formatter('%(levelname)s - %(asctime)s - %(module)s: %(message)s')
 
@@ -82,6 +85,62 @@ def get_latest_folder(root_folder: Path, pattern: str = '*/') -> Path:
         key=os.path.getmtime
     )
     return latest_folder
+
+
+@dataclass
+class PlanningRes:
+    start_pose: Pose
+    target_pose: Pose
+    plan: RobotTrajectory
+    fraction: float
+
+    @staticmethod
+    def pose_to_dict(p) -> Dict:
+        return {
+            'position': {
+                'x': p.position.x,
+                'y': p.position.y,
+                'z': p.position.z,
+            },
+            'orientation': {
+                'x': p.orientation.x,
+                'y': p.orientation.y,
+                'z': p.orientation.z,
+                'w': p.orientation.w,
+            },
+        }
+
+    @staticmethod
+    def plan_to_dict(t: RobotTrajectory) -> Dict:
+        def p_to_dict(_p: JointTrajectoryPoint) -> Dict:
+            return {
+                'positions': _p.positions,
+                'velocities': _p.velocities,
+                'accelerations': _p.accelerations,
+                'effort': _p.effort,
+                'time_from_start': {
+                    'secs': _p.time_from_start.secs,
+                    'nsecs': _p.time_from_start.nsecs
+                },
+            }
+
+        return {
+            'joint_names': t.joint_trajectory.joint_names,
+            'points': [
+                p_to_dict(p)
+                for p in t.joint_trajectory.points
+            ]
+        }
+
+    def save(self, saving_path: Path) -> None:
+        d = {
+            'start_pose': self.pose_to_dict(self.start_pose),
+            'target_pose': self.pose_to_dict(self.target_pose),
+            'plan': self.plan_to_dict(self.plan),
+            'fraction': self.fraction
+        }
+
+        json_dump(d, saving_path)
 
 
 def log_example():
