@@ -375,6 +375,8 @@ rostopic pub --once /franka_gripper/move/goal franka_gripper/MoveActionGoal "goa
 roslaunch panda_moveit_config demo_gazebo.launch
 ```
 
+delete the `ground plane` in `Models`, otherwise the gripper will not be able to reach negative `z`
+
 install and run `rqt_joint_trajectory_controller`
 
 ```
