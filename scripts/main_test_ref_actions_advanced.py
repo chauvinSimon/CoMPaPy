@@ -51,8 +51,9 @@ def plan_or_move_l_in_target_space(
     z_max = -0.159
     z_above_offset = 0.15
 
-    rz_deg_min = -0
-    rz_deg_max = 0
+    # todo: why not error when [-160°, 20°] and problems for >20°?
+    rz_deg_min = -160
+    rz_deg_max = 20
 
     resolution_m = compapy.config['move_l']['resolution_m']
     resolution_m_offset = 0
@@ -140,8 +141,9 @@ def main():
 
     plan_or_move_l_in_target_space(
         compapy=compapy,
-        n_samples=30
+        n_samples=100
     )
+
     plan_or_move_l_in_target_space(
         compapy=compapy,
         n_samples=3,
