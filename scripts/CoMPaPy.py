@@ -53,6 +53,29 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             j = self.robot.get_joint(j_name)
             self.logger.info(f'\t{j_name}: {j.bounds()}')
 
+    def rotate_joint(self, joint_name: str, value_rad: float) -> bool:
+        """
+        docs of `Joint` object:
+            https://docs.ros.org/en/jade/api/moveit_commander/html/classmoveit__commander_1_1robot_1_1RobotCommander_1_1Joint.html
+        """
+        j = self.robot.get_joint(joint_name)
+
+        bounds = j.bounds()
+        if (value_rad < bounds[0]) or (bounds[1] < value_rad):
+            bounds_deg_str = [f'{x:.1f}' for x in np.rad2deg(bounds).tolist()]
+            self.logger.error(f'value_rad [{value_rad}] rad not in bounds {bounds} rad '
+                              f'([{np.rad2deg(value_rad):.2f}] deg not in {bounds_deg_str} deg)')
+            return False
+
+        current_rad = j.value()
+        self.logger.info(f'want to rotate [{joint_name}] '
+                         f'[{np.rad2deg(current_rad):.2f}] -> [{np.rad2deg(value_rad):.2f}] deg '
+                         f'([{current_rad:.3f}] -> [{value_rad:.3f}] rad)'
+                         f'')
+
+        success = j.move(value_rad)
+        return success
+
     def _add_scene_element(self, element: Dict) -> None:
         box_name = element["name"]
 
@@ -108,8 +131,8 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             target_pose.position.z - start_pose.position.z,
         ])
         self.logger.info(f'want to travel [{distance * 100:.1f} cm]')
-        self.logger.info(f'with resolution_m=[{resolution_m:.5f}] and jump_threshold=[{jump_threshold:.3f}]')
-        self.logger.info(f'... from start_pose =  {pose_to_list(start_pose)}')
+        self.logger.info(f'... with resolution_m=[{resolution_m:.5f}] and jump_threshold=[{jump_threshold:.3f}]')
+        self.logger.info(f'... from start_pose  = {pose_to_list(start_pose)}')
         self.logger.info(f'... to   target_pose = {pose_to_list(target_pose)}')
 
         # do not add current point to the waypoint list
@@ -165,6 +188,8 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             timestamp = curr_time.strftime('%Y%m%d_%H%M%S_%f')
             file_name = f'{timestamp}_cm[{int(distance * 100)}]_f[{fraction_str}].json'
             planning_res.save(saving_path=self.planning_res_dir / file_name)
+
+        self.logger.info(f'[{fraction:.1%}] = fraction of the path achieved as described by the waypoints')
 
         return plan, fraction
 
@@ -254,7 +279,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             self.logger.error(f'after [{move_name}]: delta_cm = [{delta_cm:.2f} cm] between target and current pose')
 
         if delta_q > 0.1:
-            self.logger.error(f'after [{move_name}]: delta_q = [{delta_q:.3f} cm] between target and current pose')
+            self.logger.error(f'after [{move_name}]: delta_q = [{delta_q:.3f}] between target and current pose')
 
     def open_gripper(self) -> bool:
         # Initialize actionLib client
