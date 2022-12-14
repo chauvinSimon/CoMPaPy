@@ -5,21 +5,6 @@ from compapy.scripts.CoMPaPy import CoMPaPy
 from compapy.scripts.utils import list_to_pose, pose_to_list
 
 
-def rotate_eef(
-        compapy,
-        a_deg_max: int,
-        n_positive_angles: int
-):
-    for a_deg in np.linspace(start=0, stop=a_deg_max, num=n_positive_angles):
-        success = compapy.rotate_joint('panda_joint7', np.deg2rad(a_deg))
-        if not success:
-            raise RuntimeError(f'failed to move eef to [{a_deg}] deg')
-
-        success = compapy.rotate_joint('panda_joint7', -np.deg2rad(a_deg))
-        if not success:
-            raise RuntimeError(f'failed to move eef to [{a_deg}] deg')
-
-
 def plan_or_move_l_in_target_space(
         compapy,
         want_to_move: bool = False,
@@ -132,12 +117,6 @@ def plan_or_move_l_in_target_space(
 
 def main():
     compapy = CoMPaPy()
-
-    rotate_eef(
-        compapy=compapy,
-        a_deg_max=100,
-        n_positive_angles=5
-    )
 
     plan_or_move_l_in_target_space(
         compapy=compapy,
