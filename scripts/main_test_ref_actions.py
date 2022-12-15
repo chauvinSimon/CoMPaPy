@@ -51,31 +51,6 @@ def execute_ref_actions():
     target_pose.position.z -= 0.3
     compapy.move_l(target_pose)
 
-    # rotations of the gripper
-    init_pose = compapy.move_group.get_current_pose().pose
-    for q in [
-        # quaternion in scalar-last
-        # target is not the eef. Rather the link-8. Therefore, 45° correction
-        [0.92, -0.38, -0.0, 0.0],  # ref-pose: gripper points down: euler.xyz = [180.0, 0.0, -45.0]
-
-        [1.0, 0.0, 0.0, 0.0],  # 45° around z: [180.0, 0.0, 0.0]
-        [0.71, -0.71, -0.0, 0.0],  # -45° around z: [180.0, 0.0, -90.0]
-
-        [0.92, -0.38, -0.0, 0.0],  # ref-pose
-
-        [0.85, -0.35, -0.35, -0.15],  # 45° around y: [180.0, 45.0, -45.0]
-        [0.85, -0.35, 0.35, 0.15],  # -45° around y: [180.0, -45.0, -45.0]
-
-        [0.92, -0.38, -0.0, 0.0],  # ref-pose
-    ]:
-        target = copy.deepcopy(init_pose)
-        target.orientation.x = q[0]
-        target.orientation.y = q[1]
-        target.orientation.z = q[2]
-        target.orientation.w = q[3]
-        compapy.move_l(target)
-    compapy.move_l(init_pose)
-
 
 if __name__ == '__main__':
     execute_ref_actions()
