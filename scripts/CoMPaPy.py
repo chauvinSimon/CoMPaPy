@@ -202,6 +202,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         jump_threshold_offset = 0
 
         plan = None
+        fraction = -1.0
         for i_trial in range(n_trials):
             if i_trial > 0:
                 self.logger.info(f'trial [{i_trial + 1}] / [{n_trials}]')
@@ -235,6 +236,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
                     # todo: fallback
 
         if plan is None:
+            self.logger.error('plan is None')
             return False
 
         # we were just planning, not asking move_group to actually move the robot yet
@@ -244,6 +246,10 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         display_trajectory.trajectory_start = self.robot.get_current_state()
         display_trajectory.trajectory.append(plan)
         self.display_trajectory_publisher.publish(display_trajectory)
+
+        if fraction < 1.0:
+            self.logger.error(f'fraction is [{fraction:.3%}]')
+            return False
 
         success = self.move_group.execute(plan, wait=True)
         # todo: this prints sometimes 'ABORTED: CONTROL_FAILED'
