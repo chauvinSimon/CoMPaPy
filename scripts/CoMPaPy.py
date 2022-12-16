@@ -10,6 +10,7 @@ import numpy as np
 from pathlib import Path
 import random
 import rospy
+from scipy.spatial.transform import Rotation
 from sensor_msgs.msg import JointState
 import time
 from typing import Dict, Optional, Tuple
@@ -53,7 +54,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             j = self.robot.get_joint(j_name)
             self.logger.info(f'\t{j_name}: {j.bounds()}')
 
-    def rotate_joint(self, joint_name: str, value_rad: float) -> bool:
+    def rotate_joint(self, joint_name: str, target_rad: float) -> bool:
         """
         docs of `Joint` object:
             https://docs.ros.org/en/jade/api/moveit_commander/html/classmoveit__commander_1_1robot_1_1RobotCommander_1_1Joint.html
@@ -61,19 +62,30 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         j = self.robot.get_joint(joint_name)
 
         bounds = j.bounds()
-        if (value_rad < bounds[0]) or (bounds[1] < value_rad):
+        if (target_rad < bounds[0]) or (bounds[1] < target_rad):
             bounds_deg_str = [f'{x:.1f}' for x in np.rad2deg(bounds).tolist()]
-            self.logger.error(f'value_rad [{value_rad}] rad not in bounds {bounds} rad '
-                              f'([{np.rad2deg(value_rad):.2f}] deg not in {bounds_deg_str} deg)')
+            self.logger.error(f'target_rad [{target_rad}] rad not in bounds {bounds} rad '
+                              f'([{np.rad2deg(target_rad):.2f}] deg not in {bounds_deg_str} deg)')
             return False
 
         current_rad = j.value()
         self.logger.info(f'want to rotate [{joint_name}] '
-                         f'[{np.rad2deg(current_rad):.2f}] -> [{np.rad2deg(value_rad):.2f}] deg '
-                         f'([{current_rad:.3f}] -> [{value_rad:.3f}] rad)'
+                         f'[{np.rad2deg(current_rad):.2f}] -> [{np.rad2deg(target_rad):.2f}] deg '
+                         f'([{current_rad:.3f}] -> [{target_rad:.3f}] rad)'
                          f'')
 
-        success = j.move(value_rad)
+        success = j.move(target_rad)
+        if success:
+            end_rad = j.value()
+            diff_rad = end_rad - target_rad
+            if abs(np.rad2deg(diff_rad)) > 0.5:
+                self.logger.error(
+                    f'after successful rotation ([{np.rad2deg(current_rad):.2f}] -> [{np.rad2deg(target_rad):.2f}] deg): '
+                    f'diff_rad={np.rad2deg(diff_rad):.5f} '
+                    f'target_deg={np.rad2deg(target_rad):.1f} '
+                    f'current_deg={np.rad2deg(end_rad):.1f} '
+                )
+                return False
         return success
 
     def _add_scene_element(self, element: Dict) -> None:
@@ -266,26 +278,29 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         delta_cm = 100 * np.linalg.norm((target_pose_position - l8_pose_position))
         self.logger.info(f'after [{move_name}]: delta = [{delta_cm:0.2f} cm]')
 
-        target_pose_orientation = np.array([
+        target_q = np.array([
             target_pose.orientation.x,
             target_pose.orientation.y,
             target_pose.orientation.z,
             target_pose.orientation.w,
         ])
-        l8_pose_orientation = np.array([
+        l8_q = np.array([
             current_p.orientation.x,
             current_p.orientation.y,
             current_p.orientation.z,
             current_p.orientation.w,
         ])
-        delta_q = np.linalg.norm((target_pose_orientation - l8_pose_orientation))
-        self.logger.info(f'after [{move_name}]: delta_q = [{delta_q:0.3f}]')
+        target_euler_deg = Rotation.from_quat(target_q).as_euler('xyz', degrees=True)
+        l8_euler_deg = Rotation.from_quat(l8_q).as_euler('xyz', degrees=True)
+        delta_euler_deg = np.linalg.norm((l8_euler_deg - target_euler_deg))
+        self.logger.info(f'after [{move_name}]: delta_euler_deg = [{delta_euler_deg:0.1f}]')
 
         if delta_cm > 1.0:
             self.logger.error(f'after [{move_name}]: delta_cm = [{delta_cm:.2f} cm] between target and current pose')
 
-        if delta_q > 0.1:
-            self.logger.error(f'after [{move_name}]: delta_q = [{delta_q:.3f}] between target and current pose')
+        if delta_euler_deg > 1.0:
+            self.logger.error(f'after [{move_name}]: delta_euler_deg = [{delta_euler_deg:.1f}] '
+                              f'between target ({target_euler_deg}) and current pose ({l8_euler_deg})')
 
     def open_gripper(self) -> bool:
         # Initialize actionLib client
