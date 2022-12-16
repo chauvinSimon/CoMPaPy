@@ -431,7 +431,7 @@ roslaunch compapy real.launch robot_ip:=172.16.0.2
 in `pycharm`, with `Working directory` set to `~/catkin_ws/src/compapy`
 
 ```
-python scripts/main_test_ref_actions.py
+python scripts/tests/test_ref_actions.py
 ```
 
 <details>
@@ -442,7 +442,7 @@ python scripts/main_test_ref_actions.py
 </details>
 
 ```
-python scripts/main_test_eef_rotation.py
+python scripts/tests/test_eef_rotation.py
 ```
 
 <details>
