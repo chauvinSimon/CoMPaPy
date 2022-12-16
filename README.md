@@ -499,12 +499,16 @@ python scripts/main_example.py
 
 what can help:
 
-- changing the `eef_step` and `jump_threshold` params of `compute_cartesian_path()`, e.g. several trials with random
+- check this [answer](https://github.com/ros-planning/moveit/issues/3183#issuecomment-1202145379)
+    - > "A Cartesian path fraction less than 100% usually means either a **collision** was detected (which seems not to be the case here) or **IK failed**."
+- change the `eef_step` and `jump_threshold` params of `compute_cartesian_path()`, e.g. several trials with random
   offsets
-- adding intermediate waypoints to `waypoints` to make sub-paths easier
-- changing the `orientation` of the `target_pose`
+  - I observe `fraction` improvements of max. `1%`, i.e. so not very helpful
+- add intermediate waypoints to `waypoints` to make sub-paths easier
+- change the `orientation` of the `target_pose`
     - I noticed that simple combinations of [straight lines] and [rotation around `z` of the gripper of `rz` deg] fail
       for certain `rz` values
+- try `move_j` if this is an option :man_shrugging:
 
 #### :woozy_face: the computed `plan` includes strange joint moves
 
