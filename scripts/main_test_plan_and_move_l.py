@@ -43,8 +43,8 @@ def plan_or_move_l_in_target_space(
     z_max = -0.164 + l8_to_ee
     z_above_offset = 0.55
 
-    rz_deg_min = -270
-    rz_deg_max = 10
+    rz_deg_min = -360
+    rz_deg_max = 360
 
     resolution_m = compapy.config['move_l']['resolution_m']
     resolution_m_offset = 0
@@ -131,7 +131,8 @@ def plan_or_move_l_in_target_space(
 
     if not want_to_move:
         if failure_msgs:
-            print(f'\n{len(failure_msgs)} failures [{len(failure_msgs) / n_samples:.1%}]:')
+            percent_str = f'{len(failure_msgs) / n_samples:.1%}'
+            print(f'\n{len(failure_msgs)} failures [{percent_str}]:')
             for msg in failure_msgs:
                 print(msg)
 
@@ -139,10 +140,10 @@ def plan_or_move_l_in_target_space(
             negatives = [x for x in failure_angles if x <= 0]
             bounds_str = f'[{min(failure_angles):.1f}'
             if negatives:
-                bounds_str += f' {max(negatives):.1f}'
+                bounds_str += f' | {max(negatives):.1f}'
             if positives:
-                bounds_str += f' {min(positives):.1f}'
-            bounds_str += f' {max(failure_angles):.1f}]'
+                bounds_str += f' | {min(positives):.1f}'
+            bounds_str += f' | {max(failure_angles):.1f}]'
             print(f'problematic angles (deg) bounds {bounds_str}: {failure_msgs}')
             import matplotlib.pyplot as plt
             data = failure_angles
@@ -153,7 +154,7 @@ def plan_or_move_l_in_target_space(
                 bins=np.arange(np.floor(min(data)), np.ceil(max(data) + binwidth), binwidth)
             )
             plt.xlim(xmin=rz_deg_min, xmax=rz_deg_max)
-            plt.title(f'{len(failure_angles)} failure_angles (deg) {bounds_str}')
+            plt.title(f'{len(failure_angles)} ({percent_str}) failure_angles {bounds_str} (deg)')
             plt.show()
 
         else:
