@@ -253,8 +253,6 @@ in a terminal
 
 ## :stethoscope: verifications
 
-_todo: test them all again_
-
 ### :phone: robot connection
 
 ```
@@ -495,7 +493,8 @@ python scripts/main_example.py
 
 ### :thinking: known issues
 
-#### :100: `move_l` cannot compute an entire `plan`
+<details>
+  <summary>:100: `move_l` cannot compute an entire `plan`</summary>
 
 what can help:
 
@@ -503,25 +502,23 @@ what can help:
     - > "A Cartesian path fraction less than 100% usually means either a **collision** was detected (which seems not to be the case here) or **IK failed**."
 - change the `eef_step` and `jump_threshold` params of `compute_cartesian_path()`, e.g. several trials with random
   offsets
-  - I observe `fraction` improvements of max. `1%`, i.e. so not very helpful
+    - I observe `fraction` improvements of max. `1%`, i.e. so not very helpful
 - add intermediate waypoints to `waypoints` to make sub-paths easier
 - change the `orientation` of the `target_pose`
     - I noticed that simple combinations of [straight lines] and [rotation around `z` of the gripper of `rz` deg] fail
       for certain `rz` values
 - try `move_j` if this is an option :man_shrugging:
 
-#### :woozy_face: the computed `plan` includes strange joint moves
+</details>
 
 <details>
-  <summary>:heavy_check_mark: example</summary>
+  <summary>:woozy_face: the computed `plan` includes strange joint moves</summary>
 
 - left: `joint_1` rotates first `cw` and then `ccw`
-  - this may cause warnings / errors during the execution of the trajectory
+    - this may cause warnings / errors during the execution of the trajectory
 - right: `joint_1` keeps rotating in only one direction
 
 ![joints.gif](media/joints.gif)
-
-</details>
 
 what can help:
 
@@ -530,25 +527,33 @@ what can help:
 - play with the [`jump_threshold`](https://github.com/ros-planning/moveit/issues/773) param
   of `compute_cartesian_path()`
 - reduce the degrees of freedom of the panda arm
-    - ideally, create a new `move_group` using the [`MoveIt setup assistant`](https://ros-planning.github.io/moveit_tutorials/doc/setup_assistant/setup_assistant_tutorial.html) where not all joints are used
+    - ideally, create a new `move_group` using
+      the [`MoveIt setup assistant`](https://ros-planning.github.io/moveit_tutorials/doc/setup_assistant/setup_assistant_tutorial.html)
+      where not all joints are used
         - e.g. freeze `joint_3` and `joint_5`
         - _todo: I did not find how to do it_
     - alternatively, but not optimal, reduce the bounds in `joint_limits.yaml`
         - [`~/catkin_ws/src/franka_ros/franka_description/robots/panda/joint_limits.yaml`](https://github.com/frankaemika/franka_ros/blob/noetic-devel/franka_description/robots/panda/joint_limits.yaml)
-        - :warning: **make sure all joints are in their intervals before starting `moveit` and using the `execution` mode**
+        - :warning: **make sure all joints are in their intervals before starting `moveit` and using the `execution`
+          mode**
         - for instance:
-          - use `rqt_joint_trajectory_controller` to move joint values e.g. to `0`
-          - then stop `moveit`
-          - then set the new lighter joint limits
-          - then start `moveit` and select `execution` mode
-          - _as said, not optimal!_
+            - use `rqt_joint_trajectory_controller` to move joint values e.g. to `0`
+            - then stop `moveit`
+            - then set the new lighter joint limits
+            - then start `moveit` and select `execution` mode
+            - _as said, not optimal!_
 
-#### :game_die:	`compute_cartesian_path` is not deterministic
+</details>
+
+<details>
+  <summary>:game_die:	`compute_cartesian_path` is not deterministic</summary>
 
 using the same configurations and parameters, `compute_cartesian_path()` can return `plan` that differ in size
 
 - despite setting `python` and `numpy` `random.seed()`
 - probably a `cpp` seed setting is required instead
+
+</details>
 
 ## :+1: acknowledgements
 
