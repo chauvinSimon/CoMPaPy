@@ -13,7 +13,7 @@ with [moveit](https://ros-planning.github.io/moveit_tutorials/doc/getting_starte
 
 - using only **official** and **maintained** repos: [`franka_ros`](https://frankaemika.github.io/docs/franka_ros.html)
   and [`MoveIt`](https://ros-planning.github.io/moveit_tutorials/doc/getting_started/getting_started.html)
-- two modes: "`rviz` only" and "real panda"
+- two modes: "simulated" and "real" panda
 - no `cpp`, just `python`
 
 ## :warning: limitations
@@ -30,13 +30,11 @@ with [moveit](https://ros-planning.github.io/moveit_tutorials/doc/getting_starte
     - `move_l`
     - `open_gripper`
     - `close_gripper`
+    - `rotate_joint`
 - may require some parameter tuning
-    - e.g. for the cartesian plan in `move_l`
-    - _todo: collect params in config file_
+    - e.g. `compute_cartesian_path()` params in `move_l`
 - control `panda_link8` instead of the gripper :weary:
     - todo: `https://answers.ros.org/question/334902/moveit-control-gripper-instead-of-panda_link8-eff/`
-- no `gazebo` integration
-    - todo
 
 ## :wrench: installation
 
@@ -386,9 +384,11 @@ rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 
 in the two drop down options select `/controller_manager` and `effort_joint_trajectory_contoller`
 
-use this `rqt` tool to move each joint individually (done with gazebo in the next section)
+use this `rqt` tool:
 
-use it in `programming` mode or in a simulation to monitor the value of each joint and the distance to joint limits
+- in `execution` mode to move each joint individually _(done with gazebo in the next section)_
+
+- in `programming` mode or in a simulation to monitor the value of each joint and the distance to joint limits
 
 <details>
   <summary>:heavy_check_mark: expected result</summary>
@@ -495,7 +495,7 @@ python scripts/main_example.py
 
 ### :thinking: known issues
 
-#### :100: `move_l` cannot compute an entire path
+#### :100: `move_l` cannot compute an entire `plan`
 
 what can help:
 
@@ -506,13 +506,13 @@ what can help:
     - I noticed that simple combinations of [straight lines] and [rotation around `z` of the gripper of `rz` deg] fail
       for certain `rz` values
 
-#### :woozy_face: the computed plan includes strange joint moves
+#### :woozy_face: the computed `plan` includes strange joint moves
 
 <details>
   <summary>:heavy_check_mark: example</summary>
 
-- left: `joint_1` rotates first cw and then acw, which may cause warnings / errors during the execution of the
-  trajectory
+- left: `joint_1` rotates first `cw` and then `ccw`
+  - this may cause warnings / errors during the execution of the trajectory
 - right: `joint_1` keeps rotating in only one direction
 
 ![joints.gif](media/joints.gif)
@@ -521,17 +521,30 @@ what can help:
 
 what can help:
 
+- check this [answer](https://www.franka-community.de/t/paths-planned-using-moveit-are-very-strange/2550/2)
+- use a different planner in `MoveIt`
 - play with the [`jump_threshold`](https://github.com/ros-planning/moveit/issues/773) param
   of `compute_cartesian_path()`
-- reducing the degrees of freedom of the panda
-    - ideally, create a new move_group using the move_it_assistant where not all joints are used
+- reduce the degrees of freedom of the panda arm
+    - ideally, create a new `move_group` using the [`MoveIt setup assistant`](https://ros-planning.github.io/moveit_tutorials/doc/setup_assistant/setup_assistant_tutorial.html) where not all joints are used
         - e.g. freeze `joint_3` and `joint_5`
-        - I did not find how to do it
+        - _todo: I did not find how to do it_
     - alternatively, but not optimal, reduce the bounds in `joint_limits.yaml`
-        - `~/catkin_ws/src/franka_ros/franka_description/robots/panda/joint_limits.yaml`
-        - :warning: **make sure all joints are in their intervals before switching on the robot**
-            - for instance: use `rqt_joint_trajectory_controller` to move joint values e.g. to `0`, then stop `moveit`,
-              then set the new lighter joint limits, then start `moveit`
+        - [`~/catkin_ws/src/franka_ros/franka_description/robots/panda/joint_limits.yaml`](https://github.com/frankaemika/franka_ros/blob/noetic-devel/franka_description/robots/panda/joint_limits.yaml)
+        - :warning: **make sure all joints are in their intervals before starting `moveit` and using the `execution` mode**
+        - for instance:
+          - use `rqt_joint_trajectory_controller` to move joint values e.g. to `0`
+          - then stop `moveit`
+          - then set the new lighter joint limits
+          - then start `moveit` and select `execution` mode
+          - _as said, not optimal!_
+
+#### :game_die:	`compute_cartesian_path` is not deterministic
+
+using the same configurations and parameters, `compute_cartesian_path()` can return `plan` that differ in size
+
+- despite setting `python` and `numpy` `random.seed()`
+- probably a `cpp` seed setting is required instead
 
 ## :+1: acknowledgements
 
