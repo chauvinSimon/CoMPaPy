@@ -1,5 +1,6 @@
 import copy
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.spatial.transform import Rotation
 
 from compapy.scripts.CoMPaPy import CoMPaPy
@@ -98,10 +99,11 @@ def plan_or_move_l_in_target_space(
             success_back = compapy.move_l(target_pose=target_init_pose)
             print(f'{i_str} [back-to-start] [{"success" if success_back else "FAIL"}]')
 
-            if success_to_target and success_back:
+            success_total = success_to_target and success_down and success_up and success_back
+            if success_total:
                 n_success_moves += 1
             print(f'{i_str} [to-target and back-to-start] '
-                  f'[{"success" if (success_back and success_to_target) else "FAIL"}] '
+                  f'[{"success" if success_total else "FAIL"}] '
                   f'(n_success_moves={n_success_moves}/{i + 1})')
 
         else:  # just plan
@@ -145,7 +147,6 @@ def plan_or_move_l_in_target_space(
                 bounds_str += f' | {min(positives):.1f}'
             bounds_str += f' | {max(failure_angles):.1f}]'
             print(f'problematic angles (deg) bounds {bounds_str}: {failure_msgs}')
-            import matplotlib.pyplot as plt
             data = failure_angles
             binwidth = 1
 
