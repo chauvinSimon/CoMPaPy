@@ -369,13 +369,13 @@ rostopic pub --once /franka_gripper/move/goal franka_gripper/MoveActionGoal "goa
 
 </details>
 
-### :performing_arts: gazebo
+### :mechanical_leg: joints
+
+in `execution` mode
 
 ```
-roslaunch panda_moveit_config demo_gazebo.launch
+roslaunch compapy real.launch robot_ip:=172.16.0.2
 ```
-
-delete the `ground plane` in `Models`, otherwise the gripper will not be able to reach negative `z`
 
 install and run `rqt_joint_trajectory_controller`
 
@@ -385,6 +385,31 @@ rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 ```
 
 in the two drop down options select `/controller_manager` and `effort_joint_trajectory_contoller`
+
+use this `rqt` tool to move each joint individually (done with gazebo in the next section)
+
+use it in `programming` mode or in a simulation to monitor the value of each joint and the distance to joint limits
+
+<details>
+  <summary>:heavy_check_mark: expected result</summary>
+
+![rqt.gif](media/rqt.gif)
+
+</details>
+
+### :performing_arts: gazebo
+
+```
+roslaunch panda_moveit_config demo_gazebo.launch
+```
+
+delete the `ground_plane` in `Models`, otherwise the gripper will not be able to reach negative `z`
+
+- *todo: how to disable the `ground_plane` by default? I could not find where this is set in the `.sdf` file*
+
+```
+rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller
+```
 
 <details>
   <summary>:heavy_check_mark: expected result</summary>
@@ -413,6 +438,17 @@ python scripts/main_test_ref_actions.py
   <summary>:heavy_check_mark: expected result</summary>
 
 ![compapy_ref_moves.gif](media/compapy_ref_moves.gif)
+
+</details>
+
+```
+python scripts/main_test_eef_rotation.py
+```
+
+<details>
+  <summary>:heavy_check_mark: expected result</summary>
+
+![eef_rotation.gif](media/eef_rotation.gif)
 
 </details>
 
@@ -456,6 +492,46 @@ in `pycharm`, with `Working directory` set to `~/catkin_ws/src/compapy`
 ```
 python scripts/main_example.py
 ```
+
+### :thinking: known issues
+
+#### :100: `move_l` cannot compute an entire path
+
+what can help:
+
+- changing the `eef_step` and `jump_threshold` params of `compute_cartesian_path()`, e.g. several trials with random
+  offsets
+- adding intermediate waypoints to `waypoints` to make sub-paths easier
+- changing the `orientation` of the `target_pose`
+    - I noticed that simple combinations of [straight lines] and [rotation around `z` of the gripper of `rz` deg] fail
+      for certain `rz` values
+
+#### :woozy_face: the computed plan includes strange joint moves
+
+<details>
+  <summary>:heavy_check_mark: example</summary>
+
+- left: `joint_1` rotates first cw and then acw, which may cause warnings / errors during the execution of the
+  trajectory
+- right: `joint_1` keeps rotating in only one direction
+
+![joints.gif](media/joints.gif)
+
+</details>
+
+what can help:
+
+- play with the [`jump_threshold`](https://github.com/ros-planning/moveit/issues/773) param
+  of `compute_cartesian_path()`
+- reducing the degrees of freedom of the panda
+    - ideally, create a new move_group using the move_it_assistant where not all joints are used
+        - e.g. freeze `joint_3` and `joint_5`
+        - I did not find how to do it
+    - alternatively, but not optimal, reduce the bounds in `joint_limits.yaml`
+        - `~/catkin_ws/src/franka_ros/franka_description/robots/panda/joint_limits.yaml`
+        - :warning: **make sure all joints are in their intervals before switching on the robot**
+            - for instance: use `rqt_joint_trajectory_controller` to move joint values e.g. to `0`, then stop `moveit`,
+              then set the new lighter joint limits, then start `moveit`
 
 ## :+1: acknowledgements
 
