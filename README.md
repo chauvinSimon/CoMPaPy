@@ -167,6 +167,7 @@ follow [these instructions](https://frankaemika.github.io/docs/installation_linu
 follow [these instructions](https://frankaemika.github.io/docs/installation_linux.html#setting-up-the-real-time-kernel)
 
 - check with `uname -r`
+- note: the real-time kernel seems to be required to use the real robot, but not for `gazebo` / `rviz` simulations
 
 ##### :cartwheeling: `moveit_panda_config`
 
