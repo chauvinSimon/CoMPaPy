@@ -8,7 +8,6 @@ import moveit_msgs.msg
 from moveit_msgs.msg import RobotTrajectory
 import numpy as np
 from pathlib import Path
-import random
 import rospy
 from scipy.spatial.transform import Rotation
 from sensor_msgs.msg import JointState
@@ -22,7 +21,11 @@ from compapy.scripts.utils import setup_logger, read_yaml, json_load, pose_to_li
 
 
 class CoMPaPy(MoveGroupPythonInterfaceTutorial):
-    def __init__(self, log_file: Optional[Path] = None, save_planning_res: bool = False):
+    def __init__(
+            self,
+            log_file: Optional[Path] = None,
+            save_planning_res: bool = False
+    ):
         super(CoMPaPy, self).__init__()
 
         if log_file is None:
@@ -52,6 +55,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         self.log_joints()
 
     def log_joints(self):
+        # todo: pass optional Pose. If pose is None, read current.
         self.logger.info('joint bounds:')
         unused = []
         for j_name in self.robot.get_joint_names():
@@ -70,7 +74,11 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
                 unused.append(j_name)
         self.logger.info(f'unused joints: {unused}')
 
-    def rotate_joint(self, joint_name: str, target_rad: float) -> bool:
+    def rotate_joint(
+            self,
+            joint_name: str,
+            target_rad: float
+    ) -> bool:
         """
         docs of `Joint` object:
             https://docs.ros.org/en/jade/api/moveit_commander/html/classmoveit__commander_1_1robot_1_1RobotCommander_1_1Joint.html
@@ -104,7 +112,10 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
                 return False
         return success
 
-    def _add_scene_element(self, element: Dict) -> None:
+    def _add_scene_element(
+            self,
+            element: Dict
+    ) -> None:
         box_name = element["name"]
 
         if element["type"] == "static_box":
@@ -125,43 +136,73 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         else:
             raise NotImplementedError(f'cannot deal with element["type"]=[{element["type"]}]')
 
-    def move_j(self, target_pose: geometry_msgs.msg.Pose) -> bool:
-        self.move_group.set_pose_target(target_pose)
-
-        # todo: how to set speed?
-        #  self.move_group.set_max_velocity_scaling_factor()
-        success = self.move_group.go(wait=True)
+    def exe_plan(
+            self,
+            plan  # todo: type?
+    ) -> bool:
+        exe_success = self.move_group.execute(plan)
+        if not exe_success:
+            self.logger.error('failed to execute plan')
 
         self.move_group.stop()  # ensures that there is no residual movement
         self.move_group.clear_pose_targets()
 
-        self._compute_move_error(target_pose=target_pose, move_name='move_j')
+        return exe_success
 
-        return success
-
-    def plan_move_l(
+    def move_j(
             self,
-            start_pose: geometry_msgs.msg.Pose,
+            target_pose: geometry_msgs.msg.Pose
+    ) -> bool:
+        plan_success, plan_traj, plan_error_code = self.plan_j(target_pose)
+        if not plan_success:
+            return False
+
+        exe_success = self.exe_plan(plan_traj)
+        self._compute_move_error(target_pose=target_pose, move_name='move_j')
+        return exe_success
+
+    def move_l(
+            self,
+            target_pose: geometry_msgs.msg.Pose
+    ) -> bool:
+        plan_success, plan, fraction = self.plan_l(
+            target_pose=target_pose,
+            resolution_m=self.config['move_l']['resolution_m'],
+            jump_threshold=self.config['move_l']['jump_threshold']
+        )
+        self.save_plan(target_pose=target_pose, plan=plan)
+
+        if not plan_success:
+            self.logger.error(f'fraction is [{fraction:.1%}]')
+            return False
+
+        exe_success = self.exe_plan(plan)
+        self._compute_move_error(target_pose=target_pose, move_name='move_l')
+        return exe_success
+
+    def plan_j(
+            self,
+            target_pose: geometry_msgs.msg.Pose,
+    ):
+        plan_success, plan_traj, plan_time, plan_error_code = self.move_group.plan(target_pose)
+        self.show_plan(plan_traj)
+        self.logger.info(
+            f'plan_success = [{plan_success}] in plan_time = [{plan_time}] with plan_error_code = [{plan_error_code}]'
+        )
+        return plan_success, plan_traj, plan_error_code
+
+    def plan_l(
+            self,
             target_pose: geometry_msgs.msg.Pose,
             resolution_m: Optional[float] = None,
             jump_threshold: Optional[float] = None,
-    ) -> Tuple[RobotTrajectory, float]:
+    ) -> Tuple[bool, RobotTrajectory, float]:
 
         if jump_threshold is None:
             jump_threshold = self.config['move_l']['jump_threshold']
 
         if resolution_m is None:
             resolution_m = self.config['move_l']['resolution_m']
-
-        distance = np.linalg.norm([
-            target_pose.position.x - start_pose.position.x,
-            target_pose.position.y - start_pose.position.y,
-            target_pose.position.z - start_pose.position.z,
-        ])
-        self.logger.info(f'want to travel [{distance * 100:.1f} cm]')
-        self.logger.info(f'... with resolution_m=[{resolution_m:.5f}] and jump_threshold=[{jump_threshold:.3f}]')
-        self.logger.info(f'... from start_pose  = {pose_to_list(start_pose)}')
-        self.logger.info(f'... to   target_pose = {pose_to_list(target_pose)}')
 
         # do not add current point to the waypoint list
         #   otherwise: "Trajectory message contains waypoints that are not strictly increasing in time."
@@ -202,91 +243,26 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             # todo: add path_constraints?
             # todo: how to check the current joint-bounds written in `joint_limits.yaml`?
         )
+        self.show_plan(plan)
 
-        if self.planning_res_dir is not None:
-            # save planning results (e.g. to check determinism)
-            planning_res = PlanningRes(
-                start_pose=start_pose,
-                target_pose=target_pose,
-                plan=plan,
-                fraction=fraction,
-            )
-            fraction_str = f'{fraction:.0%}'
-            curr_time = datetime.now()
-            timestamp = curr_time.strftime('%Y%m%d_%H%M%S_%f')
-            file_name = f'{timestamp}_cm[{int(distance * 100)}]_f[{fraction_str}].json'
-            planning_res.save(saving_path=self.planning_res_dir / file_name)
+        if fraction == -1.0:
+            self.logger.error('error with compute_cartesian_path')
 
-        self.logger.info(f'[{fraction:.1%}] = fraction of the path achieved as described by the waypoints')
+        else:
+            n_points = len(plan.joint_trajectory.points)
+            self.logger.info(f'[{n_points}] points (resolution_m = {resolution_m * 100:.1f} cm) -> '
+                             f'path.length at most {n_points * resolution_m * 100:.1f} cm')
+            if fraction < 1.0:
+                self.logger.error(f'path not complete [{fraction:.1%}]')
+                self.log_joints()  # todo: pass last Pose of the plan
 
-        return plan, fraction
+        return fraction == 1.0, plan, fraction
 
-    def move_l(self, target_pose: geometry_msgs.msg.Pose, n_trials: int = 20) -> bool:
-        start_pose = self.move_group.get_current_pose().pose
-
-        resolution_m = self.config['move_l']['resolution_m']
-        resolution_m_offset = 0
-        jump_threshold = self.config['move_l']['jump_threshold']
-        jump_threshold_offset = 0
-
-        plan = None
-        fraction = -1.0
-        for i_trial in range(n_trials):
-            if i_trial > 0:
-                self.logger.info(f'trial [{i_trial + 1}] / [{n_trials}]')
-
-            # try different values for (resolution_m, jump_threshold) if the first trial failed
-            if i_trial > 0:
-                resolution_m_offset = random.uniform(-0.002, 0.002)
-                jump_threshold_offset = random.uniform(-1.0, 1.0)
-
-            plan, fraction = self.plan_move_l(
-                start_pose=start_pose,
-                target_pose=target_pose,
-                resolution_m=resolution_m + resolution_m_offset,
-                jump_threshold=jump_threshold + jump_threshold_offset
-            )
-
-            self.logger.info(f'[{fraction:.1%}] = fraction of the path achieved as described by the waypoints')
-
-            if fraction == -1.0:
-                self.logger.error('error with compute_cartesian_path')
-                # todo: fallback
-
-            else:
-                n_points = len(plan.joint_trajectory.points)
-                self.logger.info(f'[{n_points}] points (resolution_m = {resolution_m * 100:.1f} cm) -> '
-                                 f'path.length at most {n_points * resolution_m * 100:.1f} cm')
-                if fraction == 1.0:
-                    break
-                else:
-                    self.logger.error(f'path not complete [{fraction:.1%}]')
-                    # todo: fallback
-
-        if plan is None:
-            self.logger.error('plan is None')
-            return False
-
-        # we were just planning, not asking move_group to actually move the robot yet
-
-        # display the saved trajectory
-        display_trajectory = moveit_msgs.msg.DisplayTrajectory()
-        display_trajectory.trajectory_start = self.robot.get_current_state()
-        display_trajectory.trajectory.append(plan)
-        self.display_trajectory_publisher.publish(display_trajectory)
-
-        if fraction < 1.0:
-            self.logger.error(f'fraction is [{fraction:.3%}]')
-            return False
-
-        success = self.move_group.execute(plan, wait=True)
-        # todo: this prints sometimes 'ABORTED: CONTROL_FAILED'
-
-        self._compute_move_error(target_pose=target_pose, move_name='move_l')
-
-        return success
-
-    def _compute_move_error(self, target_pose: geometry_msgs.msg.Pose, move_name: str) -> None:
+    def _compute_move_error(
+            self,
+            target_pose: geometry_msgs.msg.Pose,
+            move_name: str
+    ) -> None:
         current_p = self.get_pose()
 
         target_pose_position = np.array([target_pose.position.x, target_pose.position.y, target_pose.position.z])
@@ -367,7 +343,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
     def get_joints(self):
         return self.move_group.get_current_joint_values()
 
-    def get_gripper_width_mm(self):
+    def get_gripper_width_mm(self) -> float:
         msg = rospy.wait_for_message('/franka_gripper/joint_states', JointState, timeout=5)
 
         if msg.name != ['panda_finger_joint1', 'panda_finger_joint2']:
@@ -380,3 +356,58 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         width_mm = 1000 * sum(joint_positions)
 
         return width_mm
+
+    def save_plan(
+            self,
+            target_pose,
+            plan,
+            fraction=None,
+            start_pose=None,
+    ) -> None:
+        if self.planning_res_dir is None:
+            return
+        if start_pose is None:
+            start_pose = self.move_group.get_current_pose().pose
+
+        planning_res = PlanningRes(
+            start_pose=start_pose,
+            target_pose=target_pose,
+            plan=plan,
+            fraction=fraction,
+        )
+        fraction_str = f'{fraction:.0%}' if fraction is not None else ''
+        curr_time = datetime.now()
+        timestamp = curr_time.strftime('%Y%m%d_%H%M%S_%f')
+        distance = self.compute_dist(target_pose=target_pose, start_pose=start_pose)
+        file_name = f'{timestamp}_cm[{int(distance * 100)}]_f[{fraction_str}].json'
+        planning_res.save(saving_path=self.planning_res_dir / file_name)
+
+    def compute_dist(
+            self,
+            target_pose,
+            start_pose=None,
+            log=False
+    ) -> float:
+        if start_pose is None:
+            start_pose = self.move_group.get_current_pose().pose
+
+        distance = np.linalg.norm([
+            target_pose.position.x - start_pose.position.x,
+            target_pose.position.y - start_pose.position.y,
+            target_pose.position.z - start_pose.position.z,
+        ])
+        if log:
+            self.logger.info(f'want to travel [{distance * 100:.1f} cm]')
+            # self.logger.info(f'... with resolution_m=[{resolution_m:.5f}] and jump_threshold=[{jump_threshold:.3f}]')
+            self.logger.info(f'... from start_pose  = {pose_to_list(start_pose)}')
+            self.logger.info(f'... to   target_pose = {pose_to_list(target_pose)}')
+        return distance
+
+    def show_plan(
+            self,
+            plan
+    ):
+        display_trajectory = moveit_msgs.msg.DisplayTrajectory()
+        display_trajectory.trajectory_start = self.robot.get_current_state()
+        display_trajectory.trajectory.append(plan)
+        self.display_trajectory_publisher.publish(display_trajectory)
