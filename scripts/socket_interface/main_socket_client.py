@@ -1,22 +1,30 @@
 """
 socket client for the panda robot-arm
 """
-from geometry_msgs.msg import Pose
+import argparse
 import numpy as np
 from pathlib import Path
 from scipy.spatial.transform import Rotation
 import socket
 import time
 
-from compapy.scripts.CoMPaPy import CoMPaPy
+from geometry_msgs.msg import Pose
+
+from compapy.scripts.CoMPaPyRobust import CoMPaPyRobust
 from compapy.scripts.utils import setup_logger
 from compapy.scripts.socket_interface.frame_conversion import link8_in_base, ee_in_base
 
 
-def main():
+def main(
+        teleport: bool = False,
+        ignore_gripper: bool = False
+):
     saving_dir = Path('logs') / str(time.strftime("%Y%m%d_%H%M%S"))
     saving_dir.mkdir(exist_ok=True, parents=True)
-    compapy = CoMPaPy(log_file=saving_dir / 'compapy.log')
+    compapy = CoMPaPyRobust(
+        log_file=saving_dir / 'compapy.log',
+        save_planning_res=True
+    )
 
     logger = setup_logger(name=Path(__file__).name, log_file=saving_dir / 'socket.log')
 
@@ -68,8 +76,11 @@ def main():
                     target_pose.orientation.z = q[2]
                     target_pose.orientation.w = q[3]
 
-                    success = compapy.move_l(target_pose)
-                    # todo: process response
+                    if teleport:
+                        # todo success = compapy.teleport(target_pose)
+                        raise NotImplementedError
+                    else:
+                        success = compapy.move_l(target_pose)
 
                 except Exception as e:
                     logger.error(f'[move] data=[{data}] exception={e}')
@@ -79,14 +90,22 @@ def main():
                 if data == '>gripper<>1<':
                     logger.info('trying to open')
                     try:
-                        success = compapy.open_gripper()
+                        if ignore_gripper:
+                            logger.info('skip open_gripper()')
+                            success = True
+                        else:
+                            success = compapy.open_gripper()
                     except Exception as e:
                         logger.error(f'[open-gripper] exception={e}')
                         # todo: write failure to PC socket
                 elif data == '>gripper<>0<':
                     logger.info('trying to close')
                     try:
-                        success = compapy.close_gripper()
+                        if ignore_gripper:
+                            logger.info('skip close_gripper()')
+                            success = True
+                        else:
+                            success = compapy.close_gripper()
                     except Exception as e:
                         logger.error(f'[close-gripper] exception={e}')
                         # todo: write failure to PC socket
@@ -146,6 +165,8 @@ def main():
                 joints_rad=compapy.get_joints(),
                 tcp_pose=ee_in_base_out,
             )
+            if not success:
+                state_str = 'error ' + state_str
             state_bytes = bytes(state_str, 'utf-8')
 
             logger.info(f'todo: send back success = [{success}] to cmd [{data}]')
@@ -155,4 +176,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--teleport', action='store_true')
+    parser.add_argument('--ignore_gripper', action='store_true')
+    args = parser.parse_args()
+
+    main(teleport=args.teleport, ignore_gripper=args.ignore_gripper)
