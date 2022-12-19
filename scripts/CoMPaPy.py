@@ -49,10 +49,26 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         for obstacle in obstacles_data['obstacles']:
             self._add_scene_element(obstacle)
 
+        self.log_joints()
+
+    def log_joints(self):
         self.logger.info('joint bounds:')
+        unused = []
         for j_name in self.robot.get_joint_names():
             j = self.robot.get_joint(j_name)
-            self.logger.info(f'\t{j_name}: {j.bounds()}')
+            bounds_rad = j.bounds()
+            if bounds_rad:
+                bounds_deg = [np.rad2deg(a) for a in bounds_rad]
+                bounds_deg_str = f'[{bounds_deg[0]:<6.1f}, {bounds_deg[1]:<6.1f}]'
+                current_deg = np.rad2deg(j.value())
+                percent_first = (current_deg - bounds_deg[0]) / (bounds_deg[1] - bounds_deg[0])
+                percent_second = (bounds_deg[1] - current_deg) / (bounds_deg[1] - bounds_deg[0])
+                other_info_str = f'{bounds_deg_str} - current = [{current_deg :<5.1f}] deg ' \
+                                 f'([{percent_first:<5.1%}, {percent_second:<5.1%}] to [b0, b1])'
+                self.logger.info(f'\t{j_name:<20}: {other_info_str}')
+            else:
+                unused.append(j_name)
+        self.logger.info(f'unused joints: {unused}')
 
     def rotate_joint(self, joint_name: str, target_rad: float) -> bool:
         """
