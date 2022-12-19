@@ -52,89 +52,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         for obstacle in obstacles_data['obstacles']:
             self._add_scene_element(obstacle)
 
-        self.log_joints()
-
-    def log_joints(self):
-        # todo: pass optional Pose. If pose is None, read current.
-        self.logger.info('joint bounds:')
-        unused = []
-        for j_name in self.robot.get_joint_names():
-            j = self.robot.get_joint(j_name)
-            bounds_rad = j.bounds()
-            if bounds_rad:
-                bounds_deg = [np.rad2deg(a) for a in bounds_rad]
-                bounds_deg_str = f'[{bounds_deg[0]:<6.1f}, {bounds_deg[1]:<6.1f}]'
-                current_deg = np.rad2deg(j.value())
-                percent_first = (current_deg - bounds_deg[0]) / (bounds_deg[1] - bounds_deg[0])
-                percent_second = (bounds_deg[1] - current_deg) / (bounds_deg[1] - bounds_deg[0])
-                other_info_str = f'{bounds_deg_str} - current = [{current_deg :<5.1f}] deg ' \
-                                 f'([{percent_first:<5.1%}, {percent_second:<5.1%}] to [b0, b1])'
-                self.logger.info(f'\t{j_name:<20}: {other_info_str}')
-            else:
-                unused.append(j_name)
-        self.logger.info(f'unused joints: {unused}')
-
-    def rotate_joint(
-            self,
-            joint_name: str,
-            target_rad: float
-    ) -> bool:
-        """
-        docs of `Joint` object:
-            https://docs.ros.org/en/jade/api/moveit_commander/html/classmoveit__commander_1_1robot_1_1RobotCommander_1_1Joint.html
-        """
-        j = self.robot.get_joint(joint_name)
-
-        bounds = j.bounds()
-        if (target_rad < bounds[0]) or (bounds[1] < target_rad):
-            bounds_deg_str = [f'{x:.1f}' for x in np.rad2deg(bounds).tolist()]
-            self.logger.error(f'target_rad [{target_rad}] rad not in bounds {bounds} rad '
-                              f'([{np.rad2deg(target_rad):.2f}] deg not in {bounds_deg_str} deg)')
-            return False
-
-        current_rad = j.value()
-        self.logger.info(f'want to rotate [{joint_name}] '
-                         f'[{np.rad2deg(current_rad):.2f}] -> [{np.rad2deg(target_rad):.2f}] deg '
-                         f'([{current_rad:.3f}] -> [{target_rad:.3f}] rad)'
-                         f'')
-
-        success = j.move(target_rad)
-        if success:
-            end_rad = j.value()
-            diff_rad = wrap_to_pi(end_rad) - wrap_to_pi(target_rad)
-            if abs(np.rad2deg(diff_rad)) > 0.5:
-                self.logger.error(
-                    f'after successful rotation ([{np.rad2deg(current_rad):.2f}] -> [{np.rad2deg(target_rad):.2f}] deg): '
-                    f'diff_rad={np.rad2deg(diff_rad):.5f} '
-                    f'target_deg={np.rad2deg(target_rad):.1f} '
-                    f'current_deg={np.rad2deg(end_rad):.1f} '
-                )
-                return False
-        return success
-
-    def _add_scene_element(
-            self,
-            element: Dict
-    ) -> None:
-        box_name = element["name"]
-
-        if element["type"] == "static_box":
-            box_pose = geometry_msgs.msg.PoseStamped()
-            box_pose.pose.position.x = element["x"]
-            box_pose.pose.position.y = element["y"]
-            box_pose.pose.position.z = element["z"]
-            box_pose.header.frame_id = "panda_link0"
-
-            box_size = (
-                element["size_x"],
-                element["size_y"],
-                element["size_z"]
-            )
-            self.scene.add_box(name=box_name, pose=box_pose, size=box_size)
-            # todo: wait_for_state_update
-
-        else:
-            raise NotImplementedError(f'cannot deal with element["type"]=[{element["type"]}]')
+        self._log_joints()
 
     def exe_plan(
             self,
@@ -170,7 +88,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             resolution_m=self.config['move_l']['resolution_m'],
             jump_threshold=self.config['move_l']['jump_threshold']
         )
-        self.save_plan(target_pose=target_pose, plan=plan)
+        self._save_plan(target_pose=target_pose, plan=plan)
 
         if not plan_success:
             self.logger.error(f'fraction is [{fraction:.1%}]')
@@ -185,7 +103,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             target_pose: geometry_msgs.msg.Pose,
     ):
         plan_success, plan_traj, plan_time, plan_error_code = self.move_group.plan(target_pose)
-        self.show_plan(plan_traj)
+        self._show_plan(plan_traj)
         self.logger.info(
             f'plan_success = [{plan_success}] in plan_time = [{plan_time}] with plan_error_code = [{plan_error_code}]'
         )
@@ -243,7 +161,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             # todo: add path_constraints?
             # todo: how to check the current joint-bounds written in `joint_limits.yaml`?
         )
-        self.show_plan(plan)
+        self._show_plan(plan)
 
         if fraction == -1.0:
             self.logger.error('error with compute_cartesian_path')
@@ -254,45 +172,47 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
                              f'path.length at most {n_points * resolution_m * 100:.1f} cm')
             if fraction < 1.0:
                 self.logger.error(f'path not complete [{fraction:.1%}]')
-                self.log_joints()  # todo: pass last Pose of the plan
+                self._log_joints()  # todo: pass last Pose of the plan
 
         return fraction == 1.0, plan, fraction
 
-    def _compute_move_error(
+    def rotate_joint(
             self,
-            target_pose: geometry_msgs.msg.Pose,
-            move_name: str
-    ) -> None:
-        current_p = self.get_pose()
+            joint_name: str,
+            target_rad: float
+    ) -> bool:
+        """
+        docs of `Joint` object:
+            https://docs.ros.org/en/jade/api/moveit_commander/html/classmoveit__commander_1_1robot_1_1RobotCommander_1_1Joint.html
+        """
+        j = self.robot.get_joint(joint_name)
 
-        target_pose_position = np.array([target_pose.position.x, target_pose.position.y, target_pose.position.z])
-        l8_pose_position = np.array([current_p.position.x, current_p.position.y, current_p.position.z])
-        delta_cm = 100 * np.linalg.norm((target_pose_position - l8_pose_position))
-        self.logger.info(f'after [{move_name}]: delta = [{delta_cm:0.2f} cm]')
+        bounds = j.bounds()
+        if (target_rad < bounds[0]) or (bounds[1] < target_rad):
+            bounds_deg_str = [f'{x:.1f}' for x in np.rad2deg(bounds).tolist()]
+            self.logger.error(f'target_rad [{target_rad}] rad not in bounds {bounds} rad '
+                              f'([{np.rad2deg(target_rad):.2f}] deg not in {bounds_deg_str} deg)')
+            return False
 
-        target_q = np.array([
-            target_pose.orientation.x,
-            target_pose.orientation.y,
-            target_pose.orientation.z,
-            target_pose.orientation.w,
-        ])
-        l8_q = np.array([
-            current_p.orientation.x,
-            current_p.orientation.y,
-            current_p.orientation.z,
-            current_p.orientation.w,
-        ])
-        target_euler_deg = Rotation.from_quat(target_q).as_euler('xyz', degrees=True)
-        l8_euler_deg = Rotation.from_quat(l8_q).as_euler('xyz', degrees=True)
-        delta_euler_deg = np.linalg.norm((l8_euler_deg - target_euler_deg))
-        self.logger.info(f'after [{move_name}]: delta_euler_deg = [{delta_euler_deg:0.1f}]')
+        current_rad = j.value()
+        self.logger.info(f'want to rotate [{joint_name}] '
+                         f'[{np.rad2deg(current_rad):.2f}] -> [{np.rad2deg(target_rad):.2f}] deg '
+                         f'([{current_rad:.3f}] -> [{target_rad:.3f}] rad)'
+                         f'')
 
-        if delta_cm > 1.0:
-            self.logger.error(f'after [{move_name}]: delta_cm = [{delta_cm:.2f} cm] between target and current pose')
-
-        if delta_euler_deg > 1.0:
-            self.logger.error(f'after [{move_name}]: delta_euler_deg = [{delta_euler_deg:.1f}] '
-                              f'between target ({target_euler_deg}) and current pose ({l8_euler_deg})')
+        success = j.move(target_rad)
+        if success:
+            end_rad = j.value()
+            diff_rad = wrap_to_pi(end_rad) - wrap_to_pi(target_rad)
+            if abs(np.rad2deg(diff_rad)) > 0.5:
+                self.logger.error(
+                    f'after successful rotation ([{np.rad2deg(current_rad):.2f}] -> [{np.rad2deg(target_rad):.2f}] deg): '
+                    f'diff_rad={np.rad2deg(diff_rad):.5f} '
+                    f'target_deg={np.rad2deg(target_rad):.1f} '
+                    f'current_deg={np.rad2deg(end_rad):.1f} '
+                )
+                return False
+        return success
 
     def open_gripper(self) -> bool:
         # Initialize actionLib client
@@ -357,7 +277,87 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
         return width_mm
 
-    def save_plan(
+    def _add_scene_element(
+            self,
+            element: Dict
+    ) -> None:
+        box_name = element["name"]
+
+        if element["type"] == "static_box":
+            box_pose = geometry_msgs.msg.PoseStamped()
+            box_pose.pose.position.x = element["x"]
+            box_pose.pose.position.y = element["y"]
+            box_pose.pose.position.z = element["z"]
+            box_pose.header.frame_id = "panda_link0"
+
+            box_size = (
+                element["size_x"],
+                element["size_y"],
+                element["size_z"]
+            )
+            self.scene.add_box(name=box_name, pose=box_pose, size=box_size)
+            # todo: wait_for_state_update
+
+        else:
+            raise NotImplementedError(f'cannot deal with element["type"]=[{element["type"]}]')
+
+    def _compute_move_error(
+            self,
+            target_pose: geometry_msgs.msg.Pose,
+            move_name: str
+    ) -> None:
+        current_p = self.get_pose()
+
+        target_pose_position = np.array([target_pose.position.x, target_pose.position.y, target_pose.position.z])
+        l8_pose_position = np.array([current_p.position.x, current_p.position.y, current_p.position.z])
+        delta_cm = 100 * np.linalg.norm((target_pose_position - l8_pose_position))
+        self.logger.info(f'after [{move_name}]: delta = [{delta_cm:0.2f} cm]')
+
+        target_q = np.array([
+            target_pose.orientation.x,
+            target_pose.orientation.y,
+            target_pose.orientation.z,
+            target_pose.orientation.w,
+        ])
+        l8_q = np.array([
+            current_p.orientation.x,
+            current_p.orientation.y,
+            current_p.orientation.z,
+            current_p.orientation.w,
+        ])
+        target_euler_deg = Rotation.from_quat(target_q).as_euler('xyz', degrees=True)
+        l8_euler_deg = Rotation.from_quat(l8_q).as_euler('xyz', degrees=True)
+        delta_euler_deg = np.linalg.norm((l8_euler_deg - target_euler_deg))
+        self.logger.info(f'after [{move_name}]: delta_euler_deg = [{delta_euler_deg:0.1f}]')
+
+        if delta_cm > 1.0:
+            self.logger.error(f'after [{move_name}]: delta_cm = [{delta_cm:.2f} cm] between target and current pose')
+
+        if delta_euler_deg > 1.0:
+            self.logger.error(f'after [{move_name}]: delta_euler_deg = [{delta_euler_deg:.1f}] '
+                              f'between target ({target_euler_deg}) and current pose ({l8_euler_deg})')
+
+    def _log_joints(self):
+        # todo: pass optional Pose. If pose is None, read current.
+        self.logger.info('joint bounds:')
+        unused = []
+        for j_name in self.robot.get_joint_names():
+            j = self.robot.get_joint(j_name)
+            bounds_rad = j.bounds()
+            if bounds_rad:
+                bounds_deg = [np.rad2deg(a) for a in bounds_rad]
+                bounds_deg_str = f'[{bounds_deg[0]:<6.1f}, {bounds_deg[1]:<6.1f}]'
+                current_deg = np.rad2deg(j.value())
+                percent_first = (current_deg - bounds_deg[0]) / (bounds_deg[1] - bounds_deg[0])
+                percent_second = (bounds_deg[1] - current_deg) / (bounds_deg[1] - bounds_deg[0])
+                other_info_str = f'{bounds_deg_str} - current = [{current_deg :<5.1f}] deg ' \
+                                 f'([{percent_first:<5.1%}, {percent_second:<5.1%}] to [b0, b1])'
+                self.logger.info(f'\t{j_name:<20}: {other_info_str}')
+            else:
+                unused.append(j_name)
+        self.logger.info(f'unused joints: {unused}')
+
+    def _save_plan(
             self,
             target_pose,
             plan,
@@ -378,11 +378,20 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         fraction_str = f'{fraction:.0%}' if fraction is not None else ''
         curr_time = datetime.now()
         timestamp = curr_time.strftime('%Y%m%d_%H%M%S_%f')
-        distance = self.compute_dist(target_pose=target_pose, start_pose=start_pose)
+        distance = self._compute_dist(target_pose=target_pose, start_pose=start_pose)
         file_name = f'{timestamp}_cm[{int(distance * 100)}]_f[{fraction_str}].json'
         planning_res.save(saving_path=self.planning_res_dir / file_name)
 
-    def compute_dist(
+    def _show_plan(
+            self,
+            plan
+    ):
+        display_trajectory = moveit_msgs.msg.DisplayTrajectory()
+        display_trajectory.trajectory_start = self.robot.get_current_state()
+        display_trajectory.trajectory.append(plan)
+        self.display_trajectory_publisher.publish(display_trajectory)
+
+    def _compute_dist(
             self,
             target_pose,
             start_pose=None,
@@ -402,12 +411,3 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             self.logger.info(f'... from start_pose  = {pose_to_list(start_pose)}')
             self.logger.info(f'... to   target_pose = {pose_to_list(target_pose)}')
         return distance
-
-    def show_plan(
-            self,
-            plan
-    ):
-        display_trajectory = moveit_msgs.msg.DisplayTrajectory()
-        display_trajectory.trajectory_start = self.robot.get_current_state()
-        display_trajectory.trajectory.append(plan)
-        self.display_trajectory_publisher.publish(display_trajectory)
