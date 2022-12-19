@@ -410,7 +410,7 @@ about `ground_plane`
 
 two solutions
 - either ... delete the `ground_plane` in `Models`
-- or ... create a `my_empty.world` with just a `sun`, and add the args `world:=[PATH_TO_my_empty.world]` to the `demo_gazebo.launch`
+- or ... create a `my_empty.world` with just a `sun`, and add the args `world:=[ABSOLUTE_PATH_TO_my_empty.world]` to the `demo_gazebo.launch`
 
 ```xml
 <?xml version="1.0" ?>
