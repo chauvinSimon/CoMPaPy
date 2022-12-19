@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import json
 import logging
+import numpy as np
 import os
 from pathlib import Path
 from typing import List, Optional, Dict
@@ -75,6 +76,10 @@ def pose_to_list(pose: Pose) -> List[float]:
         pose.orientation.z,
         pose.orientation.w,
     ]
+
+
+def wrap_to_pi(a_rad: float) -> float:
+    return (a_rad + np.pi) % (2 * np.pi) - np.pi
 
 
 def get_latest_folder(root_folder: Path, pattern: str = '*/') -> Path:

@@ -18,7 +18,7 @@ from typing import Dict, Optional, Tuple
 from moveit_tutorials.doc.move_group_python_interface.scripts.move_group_python_interface_tutorial import \
     MoveGroupPythonInterfaceTutorial
 
-from compapy.scripts.utils import setup_logger, read_yaml, json_load, pose_to_list, PlanningRes
+from compapy.scripts.utils import setup_logger, read_yaml, json_load, pose_to_list, PlanningRes, wrap_to_pi
 
 
 class CoMPaPy(MoveGroupPythonInterfaceTutorial):
@@ -77,7 +77,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         success = j.move(target_rad)
         if success:
             end_rad = j.value()
-            diff_rad = end_rad - target_rad
+            diff_rad = wrap_to_pi(end_rad) - wrap_to_pi(target_rad)
             if abs(np.rad2deg(diff_rad)) > 0.5:
                 self.logger.error(
                     f'after successful rotation ([{np.rad2deg(current_rad):.2f}] -> [{np.rad2deg(target_rad):.2f}] deg): '
