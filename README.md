@@ -397,13 +397,37 @@ use this `rqt` tool:
 
 ### :performing_arts: gazebo
 
+<details>
+  <summary>:plate_with_cutlery: ground_plane</summary>
+
+about `ground_plane`
+- the default `world` contains a `ground_plane`
+- it acts as an obstacle and prevents the robot from reaching negative `z`
+- it is located in `/usr/share/gazebo-11/worlds/empty.world`
+
+![gazebo_ground_plane.gif](media/gazebo_ground_plane.gif)
+
+two solutions
+- either ... delete the `ground_plane` in `Models`
+- or ... create a `my_empty.world` with just a `sun`, and add the args `world:=[PATH_TO_my_empty.world]` to the `demo_gazebo.launch`
+
+```xml
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <world name="default">
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+  </world>
+</sdf>
+```
+
+</details>
+
 ```
 roslaunch panda_moveit_config demo_gazebo.launch
 ```
-
-delete the `ground_plane` in `Models`, otherwise the gripper will not be able to reach negative `z`
-
-- *todo: how to disable the `ground_plane` by default? I could not find where this is set in the `.sdf` file*
 
 ```
 rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller
