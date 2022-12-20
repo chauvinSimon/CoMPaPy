@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 import actionlib
 from datetime import datetime
 import franka_gripper.msg
@@ -190,7 +189,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         bounds = j.bounds()
         if (target_rad < bounds[0]) or (bounds[1] < target_rad):
             bounds_deg_str = [f'{x:.1f}' for x in np.rad2deg(bounds).tolist()]
-            self.logger.error(f'target_rad [{target_rad}] rad not in bounds {bounds} rad '
+            self.logger.error(f'target_rad [{target_rad:.3f}] rad not in bounds {bounds} rad '
                               f'([{np.rad2deg(target_rad):.2f}] deg not in {bounds_deg_str} deg)')
             return False
 
@@ -325,17 +324,18 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             current_p.orientation.z,
             current_p.orientation.w,
         ])
-        target_euler_deg = Rotation.from_quat(target_q).as_euler('xyz', degrees=True)
-        l8_euler_deg = Rotation.from_quat(l8_q).as_euler('xyz', degrees=True)
-        delta_euler_deg = np.linalg.norm((l8_euler_deg - target_euler_deg))
-        self.logger.info(f'after [{move_name}]: delta_euler_deg = [{delta_euler_deg:0.1f}]')
+        target_euler_rad = Rotation.from_quat(target_q).as_euler('xyz')
+        l8_euler_rad = Rotation.from_quat(l8_q).as_euler('xyz')
+        delta_euler_rad = np.linalg.norm((wrap_to_pi(l8_euler_rad - target_euler_rad)))
+        self.logger.info(f'after [{move_name}]: delta_euler_deg = [{np.rad2deg(delta_euler_rad):0.1f}]')
 
         if delta_cm > 1.0:
             self.logger.error(f'after [{move_name}]: delta_cm = [{delta_cm:.2f} cm] between target and current pose')
 
-        if delta_euler_deg > 1.0:
-            self.logger.error(f'after [{move_name}]: delta_euler_deg = [{delta_euler_deg:.1f}] '
-                              f'between target ({target_euler_deg}) and current pose ({l8_euler_deg})')
+        if delta_euler_rad > np.deg2rad(1.0):
+            self.logger.error(f'after [{move_name}]: delta_euler_deg = [{np.rad2deg(delta_euler_rad):.1f}] '
+                              f'between target ({np.rad2deg(target_euler_rad)}) '
+                              f'and current pose ({np.rad2deg(l8_euler_rad)})')
 
     def _log_joints(self):
         # todo: pass optional Pose. If pose is None, read current.
