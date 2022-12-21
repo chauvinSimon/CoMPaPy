@@ -15,6 +15,17 @@ from compapy.scripts.utils import setup_logger
 from compapy.scripts.socket_interface.frame_conversion import link8_in_base, ee_in_base
 
 
+def state_to_str(
+        gripper_gap_mm,
+        joints_rad,
+        tcp_pose,
+) -> str:
+    state_gripper = f'[gripper_gap_mm={gripper_gap_mm}]'
+    state_joints = ''.join([f'[j_{i}={joints_rad[i]}]' for i in range(6)])
+    state_pose = ''.join([f'[p_{i}={tcp_pose[i]}]' for i in range(6)])
+    return state_gripper + state_joints + state_pose
+
+
 def main(
         teleport: bool = False,
         ignore_gripper: bool = False
@@ -152,17 +163,7 @@ def main(
                 f'(euler-deg)'
             )
 
-            def to_str(
-                    gripper_gap_mm,
-                    joints_rad,
-                    tcp_pose,
-            ) -> str:
-                state_gripper = f'[gripper_gap_mm={gripper_gap_mm}]'
-                state_joints = ''.join([f'[j_{i}={joints_rad[i]}]' for i in range(6)])
-                state_pose = ''.join([f'[p_{i}={tcp_pose[i]}]' for i in range(6)])
-                return state_gripper + state_joints + state_pose
-
-            state_str = to_str(
+            state_str = state_to_str(
                 gripper_gap_mm=compapy.get_gripper_width_mm(),
                 joints_rad=compapy.get_joints(),
                 tcp_pose=ee_in_base_out,
