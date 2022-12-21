@@ -88,13 +88,37 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
     def move_l(
             self,
-            target_pose: Pose
+            target_pose: Pose,
+            n_trials: int = 1
     ) -> Tuple[bool, str]:
-        plan_success, plan, fraction = self.plan_l(
-            target_pose=target_pose,
-            resolution_m=self.config['move_l']['resolution_m'],
-            jump_threshold=self.config['move_l']['jump_threshold']
-        )
+        assert n_trials > 0, 'n_trials must be > 0'
+
+        resolution_m_offset = 0
+        jump_threshold_offset = 0
+        plan_success = plan = fraction = None
+
+        for i_trial in range(n_trials):
+            if i_trial > 0:
+                resolution_m_offset = np.random.uniform(
+                    self.config['move_l']['min_resolution_m_offset'],
+                    self.config['move_l']['max_resolution_m_offset']
+                )
+                jump_threshold_offset = np.random.uniform(
+                    self.config['move_l']['min_jump_threshold_offset'],
+                    self.config['move_l']['max_jump_threshold_offset']
+                )
+
+            plan_success, plan, fraction = self.plan_l(
+                target_pose=target_pose,
+                resolution_m=self.config['move_l']['resolution_m'] + resolution_m_offset,
+                jump_threshold=self.config['move_l']['jump_threshold'] + jump_threshold_offset
+            )
+            if plan_success:
+                if i_trial > 0:
+                    self.logger.info(f'trial [{i_trial}]/[{n_trials - 1}] retrying with other params helped!')
+                break
+            self.logger.warning(f'trial [{i_trial}]/[{n_trials - 1}] failed: fraction=[{fraction:.1%}]')
+
         self._save_plan(target_pose=target_pose, plan=plan)
 
         if not plan_success:
