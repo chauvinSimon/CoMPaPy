@@ -1,17 +1,18 @@
 import actionlib
 from datetime import datetime
+import numpy as np
+from pathlib import Path
+import rospy
+from scipy.spatial.transform import Rotation
+import time
+from typing import Dict, Optional, Tuple, List
+
 import franka_gripper.msg
 import geometry_msgs
 from geometry_msgs.msg import Pose
 import moveit_msgs.msg
 from moveit_msgs.msg import RobotTrajectory
-import numpy as np
-from pathlib import Path
-import rospy
-from scipy.spatial.transform import Rotation
 from sensor_msgs.msg import JointState
-import time
-from typing import Dict, Optional, Tuple
 
 from moveit_tutorials.doc.move_group_python_interface.scripts.move_group_python_interface_tutorial import \
     MoveGroupPythonInterfaceTutorial
@@ -55,7 +56,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
     def exe_plan(
             self,
-            plan  # todo: type?
+            plan: RobotTrajectory
     ) -> bool:
         exe_success = self.move_group.execute(plan)
         if not exe_success:
@@ -68,20 +69,27 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
     def move_j(
             self,
-            target_pose: geometry_msgs.msg.Pose
-    ) -> bool:
+            target_pose: Pose
+    ) -> Tuple[bool, str]:
         plan_success, plan_traj, plan_error_code = self.plan_j(target_pose)
         if not plan_success:
-            return False
+            err_msg = 'planning failed'
+            self.logger.error(err_msg)
+            return False, err_msg
 
         exe_success = self.exe_plan(plan_traj)
         self._compute_move_error(target_pose=target_pose, move_name='move_j')
-        return exe_success
+        if not exe_success:
+            error_msg = 'execution of plan failed'
+            self.logger.error(error_msg)
+            return exe_success, error_msg
+
+        return exe_success, ''
 
     def move_l(
             self,
-            target_pose: geometry_msgs.msg.Pose
-    ) -> bool:
+            target_pose: Pose
+    ) -> Tuple[bool, str]:
         plan_success, plan, fraction = self.plan_l(
             target_pose=target_pose,
             resolution_m=self.config['move_l']['resolution_m'],
@@ -90,17 +98,23 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         self._save_plan(target_pose=target_pose, plan=plan)
 
         if not plan_success:
-            self.logger.error(f'fraction is [{fraction:.1%}]')
-            return False
+            error_msg = f'planning failed: fraction=[{fraction:.1%}]'
+            self.logger.error(error_msg)
+            return False, error_msg
 
         exe_success = self.exe_plan(plan)
         self._compute_move_error(target_pose=target_pose, move_name='move_l')
-        return exe_success
+        if not exe_success:
+            error_msg = 'execution of plan failed'
+            self.logger.error(error_msg)
+            return exe_success, error_msg
+
+        return exe_success, ''
 
     def plan_j(
             self,
-            target_pose: geometry_msgs.msg.Pose,
-    ):
+            target_pose: Pose,
+    ) -> Tuple[bool, RobotTrajectory, str]:
         plan_success, plan_traj, plan_time, plan_error_code = self.move_group.plan(target_pose)
         self._show_plan(plan_traj)
         self.logger.info(
@@ -110,7 +124,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
     def plan_l(
             self,
-            target_pose: geometry_msgs.msg.Pose,
+            target_pose: Pose,
             resolution_m: Optional[float] = None,
             jump_threshold: Optional[float] = None,
     ) -> Tuple[bool, RobotTrajectory, float]:
@@ -179,7 +193,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             self,
             joint_name: str,
             target_rad: float
-    ) -> bool:
+    ) -> Tuple[bool, str]:
         """
         docs of `Joint` object:
             https://docs.ros.org/en/jade/api/moveit_commander/html/classmoveit__commander_1_1robot_1_1RobotCommander_1_1Joint.html
@@ -189,9 +203,10 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         bounds = j.bounds()
         if (target_rad < bounds[0]) or (bounds[1] < target_rad):
             bounds_deg_str = [f'{x:.1f}' for x in np.rad2deg(bounds).tolist()]
-            self.logger.error(f'target_rad [{target_rad:.3f}] rad not in bounds {bounds} rad '
-                              f'([{np.rad2deg(target_rad):.2f}] deg not in {bounds_deg_str} deg)')
-            return False
+            error_msg = f'target_rad [{target_rad:.3f}] rad not in bounds {bounds} rad ' \
+                        f'([{np.rad2deg(target_rad):.2f}] deg not in {bounds_deg_str} deg)'
+            self.logger.error(error_msg)
+            return False, error_msg
 
         current_rad = j.value()
         self.logger.info(f'want to rotate [{joint_name}] '
@@ -204,14 +219,15 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             end_rad = j.value()
             diff_rad = wrap_to_pi(end_rad) - wrap_to_pi(target_rad)
             if abs(np.rad2deg(diff_rad)) > 0.5:
-                self.logger.error(
-                    f'after successful rotation ([{np.rad2deg(current_rad):.2f}] -> [{np.rad2deg(target_rad):.2f}] deg): '
-                    f'diff_rad={np.rad2deg(diff_rad):.5f} '
-                    f'target_deg={np.rad2deg(target_rad):.1f} '
-                    f'current_deg={np.rad2deg(end_rad):.1f} '
-                )
-                return False
-        return success
+                error_msg = f'after successful rotation ' \
+                            f'([{np.rad2deg(current_rad):.2f}] -> [{np.rad2deg(target_rad):.2f}] deg): ' \
+                            f'diff_rad={np.rad2deg(diff_rad):.5f} ' \
+                            f'target_deg={np.rad2deg(target_rad):.1f} ' \
+                            f'current_deg={np.rad2deg(end_rad):.1f} '
+                self.logger.error(error_msg)
+                return False, error_msg
+
+        return success, ''
 
     def open_gripper(self) -> bool:
         # Initialize actionLib client
@@ -256,10 +272,10 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         result = grasp_client.get_result()
         return result.success
 
-    def get_pose(self):
+    def get_pose(self) -> Pose:
         return self.move_group.get_current_pose().pose
 
-    def get_joints(self):
+    def get_joints(self) -> List[float]:
         return self.move_group.get_current_joint_values()
 
     def get_gripper_width_mm(self) -> float:
@@ -302,7 +318,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
     def _compute_move_error(
             self,
-            target_pose: geometry_msgs.msg.Pose,
+            target_pose: Pose,
             move_name: str
     ) -> None:
         current_p = self.get_pose()
@@ -337,7 +353,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
                               f'between target ({np.rad2deg(target_euler_rad)}) '
                               f'and current pose ({np.rad2deg(l8_euler_rad)})')
 
-    def _log_joints(self):
+    def _log_joints(self) -> None:
         # todo: pass optional Pose. If pose is None, read current.
         self.logger.info('joint bounds:')
         unused = []
@@ -359,10 +375,10 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
     def _save_plan(
             self,
-            target_pose,
-            plan,
-            fraction=None,
-            start_pose=None,
+            target_pose: Pose,
+            plan: RobotTrajectory,
+            fraction: Optional[float] = None,
+            start_pose: Optional[Pose] = None,
     ) -> None:
         if self.planning_res_dir is None:
             return
@@ -378,24 +394,24 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         fraction_str = f'{fraction:.0%}' if fraction is not None else ''
         curr_time = datetime.now()
         timestamp = curr_time.strftime('%Y%m%d_%H%M%S_%f')
-        distance = self._compute_dist(target_pose=target_pose, start_pose=start_pose)
+        distance = self._compute_distance(target_pose=target_pose, start_pose=start_pose)
         file_name = f'{timestamp}_cm[{int(distance * 100)}]_f[{fraction_str}].json'
         planning_res.save(saving_path=self.planning_res_dir / file_name)
 
     def _show_plan(
             self,
-            plan
-    ):
+            plan: RobotTrajectory
+    ) -> None:
         display_trajectory = moveit_msgs.msg.DisplayTrajectory()
         display_trajectory.trajectory_start = self.robot.get_current_state()
         display_trajectory.trajectory.append(plan)
         self.display_trajectory_publisher.publish(display_trajectory)
 
-    def _compute_dist(
+    def _compute_distance(
             self,
-            target_pose,
-            start_pose=None,
-            log=False
+            target_pose: Pose,
+            start_pose: Optional[Pose] = None,
+            log: bool = False
     ) -> float:
         if start_pose is None:
             start_pose = self.move_group.get_current_pose().pose

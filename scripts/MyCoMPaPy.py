@@ -8,7 +8,7 @@ a specialization for a particular setting
 import numpy as np
 from pathlib import Path
 from scipy.spatial.transform import Rotation
-from typing import Optional
+from typing import Optional, Tuple
 
 import geometry_msgs
 from compapy.scripts.utils import wrap_to_pi, wrap_to_pi_over_four
@@ -60,18 +60,16 @@ class MyCoMPaPy(CoMPaPy):
 
     def my_move(
             self,
-            target_pose: geometry_msgs.msg.Pose
-    ) -> bool:
+            target_pose: Pose
+    ) -> Tuple[bool, str]:
         target_pose = self.process_target(target_pose=target_pose)
         if target_pose is None:
-            return False
+            return False, f'cannot process target_pose = {target_pose}'
 
         # todo: fallback in case move_l fails
         # todo: recovery from HW error
-        success_move = self.move_l(target_pose=target_pose)
-        if not success_move:
-            self.logger.error(f'move_l failed for processed target = {target_pose}')
-        return success_move
+        success_move, move_error_msg = self.move_l(target_pose=target_pose)
+        return success_move, move_error_msg
 
     def rz_from_q(self, q: Quaternion) -> Optional[float]:
         """

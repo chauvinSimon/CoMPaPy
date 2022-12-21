@@ -90,7 +90,9 @@ def main(
                         # todo success = compapy.teleport(target_pose)
                         raise NotImplementedError
                     else:
-                        success = compapy.my_move(target_pose)
+                        success, move_err_msg = compapy.my_move(target_pose)
+                        if move_err_msg:
+                            error_msg += f' move_err_msg=[{move_err_msg}] '
 
                 except Exception as e:
                     msg = f'[move] exception=[{e}] data=[{data}]'
@@ -172,7 +174,7 @@ def main(
                 success = False
                 logger.error(f'error_msg: {error_msg}')
             if not success:
-                state_str = f'error: {error_msg} || state_str = {state_str}'
+                state_str = f'error: [{error_msg}] || state_str = {state_str}'
 
             logger.debug(f'state_str = {state_str}')
             state_bytes = bytes(state_str, 'utf-8')
@@ -183,8 +185,10 @@ def main(
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--teleport', action='store_true')
-    parser.add_argument('--ignore_gripper', action='store_true')
+    parser.add_argument('--teleport', action='store_true',
+                        help='speed up the simulation by [plan+teleport] instead of [plan+execute]')
+    parser.add_argument('--ignore_gripper', action='store_true',
+                        help='speed up the simulation by not opening/closing the gripper')
     args = parser.parse_args()
 
     main(teleport=args.teleport, ignore_gripper=args.ignore_gripper)
