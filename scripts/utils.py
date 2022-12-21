@@ -82,6 +82,10 @@ def wrap_to_pi(a_rad: float) -> float:
     return (a_rad + np.pi) % (2 * np.pi) - np.pi
 
 
+def wrap_to_pi_over_four(a_rad: float) -> float:
+    return (a_rad + np.pi / 4) % (np.pi / 2) - np.pi / 4
+
+
 def get_latest_folder(root_folder: Path, pattern: str = '*/') -> Path:
     latest_folder = max([
         p for p in Path(root_folder).glob(pattern)
