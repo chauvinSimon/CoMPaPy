@@ -427,7 +427,7 @@ two solutions
 </details>
 
 ```
-roslaunch panda_moveit_config demo_gazebo.launch
+roslaunch panda_moveit_config demo_gazebo.launch [world:=/home/simonchauvin/catkin_ws/src/compapy/config/my_empty.world]
 ```
 
 ```
@@ -561,6 +561,7 @@ what can help:
         - [`~/catkin_ws/src/franka_ros/franka_description/robots/panda/joint_limits.yaml`](https://github.com/frankaemika/franka_ros/blob/noetic-devel/franka_description/robots/panda/joint_limits.yaml)
         - :warning: **make sure all joints are in their intervals before starting `moveit` and using the `execution`
           mode**
+        - note: [`fr3`](https://github.com/frankaemika/franka_ros/blob/develop/franka_description/robots/fr3/joint_limits.yaml) is more constrained than [`panda`](https://github.com/frankaemika/franka_ros/blob/develop/franka_description/robots/panda/joint_limits.yaml)
         - for instance:
             - use `rqt_joint_trajectory_controller` to move joint values e.g. to `0`
             - then stop `moveit`
