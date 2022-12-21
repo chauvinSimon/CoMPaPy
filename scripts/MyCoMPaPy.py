@@ -54,8 +54,12 @@ class MyCoMPaPy(CoMPaPy):
             rz_ee = wrap_to_pi_over_four(a_rad=target_rz_ee_rad)
             rz_l8 = rz_ee - np.deg2rad(45)
             self.logger.warning(f'setting rz_ee={np.rad2deg(rz_ee):.1f} => rz_l8={np.rad2deg(rz_l8):.1f} deg')
-            q = self.q_from_rz(rz_rad=rz_l8)
-            target_pose.orientation = q
+        else:
+            rz_l8 = target_rz_rad
+
+        q = self.q_from_rz(rz_rad=rz_l8)
+        target_pose.orientation = q
+
         return target_pose
 
     def my_move(
@@ -66,10 +70,22 @@ class MyCoMPaPy(CoMPaPy):
         if target_pose is None:
             return False, f'cannot process target_pose = {target_pose}'
 
-        # todo: fallback in case move_l fails
-        # todo: recovery from HW error
+        error_msg = ''
         success_move, move_error_msg = self.move_l(target_pose=target_pose)
-        return success_move, move_error_msg
+        if move_error_msg:
+            error_msg += f'`move_l` failed: [{move_error_msg}] || trying fallback ...'
+
+        if not success_move:
+            self.logger.warning('falling back after `move_l` failed')
+            success_move, move_error_msg = self.move_j(target_pose=target_pose)
+            if move_error_msg:
+                error_msg += f'`move_j` failed: [{move_error_msg}]'
+
+            # todo: additional fallbacks
+
+        # todo: recovery from HW error
+
+        return success_move, error_msg
 
     def rz_from_q(self, q: Quaternion) -> Optional[float]:
         """
