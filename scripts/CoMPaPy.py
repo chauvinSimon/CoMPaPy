@@ -278,19 +278,45 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
     def get_joints(self) -> List[float]:
         return self.move_group.get_current_joint_values()
 
-    def get_gripper_width_mm(self) -> float:
-        msg = rospy.wait_for_message('/franka_gripper/joint_states', JointState, timeout=5)
+    def get_gripper_width_mm(
+            self
+    ) -> Tuple[Optional[float], str]:
+        """
+        todo:
+        Exception in thread /franka_gripper/joint_states:
+        Traceback (most recent call last):
+          File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+            self.run()
+          File "/usr/lib/python3.8/threading.py", line 870, in run
+            self._target(*self._args, **self._kwargs)
+          File "/opt/ros/noetic/lib/python3/dist-packages/rospy/impl/tcpros_pubsub.py", line 185, in robust_connect_subscriber
+            conn.receive_loop(receive_cb)
+          File "/opt/ros/noetic/lib/python3/dist-packages/rospy/impl/tcpros_base.py", line 846, in receive_loop
+            self.close()
+          File "/opt/ros/noetic/lib/python3/dist-packages/rospy/impl/tcpros_base.py", line 858, in close
+            self.socket.close()
+        AttributeError: 'NoneType' object has no attribute 'close'
+        """
+        width_mm = None
+        error_msg = ''
 
-        if msg.name != ['panda_finger_joint1', 'panda_finger_joint2']:
-            self.logger.error(f'[gripper] msg.name = {msg.name}')
+        try:
+            msg = rospy.wait_for_message('/franka_gripper/joint_states', JointState, timeout=5)
 
-        joint_positions = msg.position
-        self.logger.info(f'[gripper] joint_positions = {joint_positions}')
+            if msg.name != ['panda_finger_joint1', 'panda_finger_joint2']:
+                self.logger.error(f'[gripper] msg.name = {msg.name}')
 
-        # as strange as it can be, "width" can be directly derived from the two joint angles
-        width_mm = 1000 * sum(joint_positions)
+            joint_positions = msg.position
+            self.logger.info(f'[gripper] joint_positions = {joint_positions}')
 
-        return width_mm
+            # as strange as it can be, "width" can be directly derived from the two joint angles
+            width_mm = 1000 * sum(joint_positions)
+
+        except Exception as e:
+            error_msg = f'[get_gripper_width_mm] {e}'
+            self.logger.error(error_msg)
+
+        return width_mm, error_msg
 
     def _add_scene_element(
             self,

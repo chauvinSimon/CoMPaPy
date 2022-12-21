@@ -128,7 +128,6 @@ def main(
                     msg = f'[gripper]: data=[{data}] not supported'
                     logger.error(msg)
                     error_msg += f' {msg} '
-                logger.info(f'width_mm = {compapy.get_gripper_width_mm():.1f}')
 
             else:
                 msg = f'data=[{data}] not supported'
@@ -165,16 +164,23 @@ def main(
                 f'(euler-deg)'
             )
 
+            gripper_gap_mm, gripper_err_msg = compapy.get_gripper_width_mm()
+            if gripper_gap_mm is None:
+                success = False
+                msg = f'could not read gripper_gap: [{gripper_err_msg}]'
+                logger.error(msg)
+                error_msg += f' {msg} '
+
             state_str = state_to_str(
-                gripper_gap_mm=compapy.get_gripper_width_mm(),
+                gripper_gap_mm=gripper_gap_mm,
                 joints_rad=compapy.get_joints(),
                 tcp_pose=ee_in_base_out,
             )
+
             if error_msg:
-                success = False
-                logger.error(f'error_msg: {error_msg}')
+                state_str = f'msg=[{error_msg}] || state_str={state_str}'
             if not success:
-                state_str = f'error: [{error_msg}] || state_str = {state_str}'
+                state_str = f'error: {state_str}'
 
             logger.debug(f'state_str = {state_str}')
             state_bytes = bytes(state_str, 'utf-8')
