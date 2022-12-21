@@ -73,13 +73,13 @@ class MyCoMPaPy(CoMPaPy):
         error_msg = ''
         success_move, move_error_msg = self.move_l(target_pose=target_pose)
         if move_error_msg:
-            error_msg += f'`move_l` failed: [{move_error_msg}] || trying fallback ...'
+            error_msg += f'`move_l` failed: [{move_error_msg}] || trying fallback ... '
 
         if not success_move:
             self.logger.warning('falling back after `move_l` failed')
             success_move, move_error_msg = self.move_j(target_pose=target_pose)
             if move_error_msg:
-                error_msg += f'`move_j` failed: [{move_error_msg}]'
+                error_msg += f' `move_j` failed: [{move_error_msg}]'
 
             # todo: additional fallbacks
 
