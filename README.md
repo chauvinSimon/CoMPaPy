@@ -34,7 +34,7 @@ with [moveit](https://ros-planning.github.io/moveit_tutorials/doc/getting_starte
 - may require some parameter tuning
     - e.g. `compute_cartesian_path()` params in `move_l`
 - control `panda_link8` instead of the gripper :weary:
-    - todo: [ros.org/question/334902](https://answers.ros.org/question/334902/moveit-control-gripper-instead-of-panda_link8-eff/
+    - todo: [ros.org/question/334902](https://answers.ros.org/question/334902/moveit-control-gripper-instead-of-panda_link8-eff/)
 
 ## :wrench: installation
 
