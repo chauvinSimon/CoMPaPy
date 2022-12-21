@@ -10,7 +10,7 @@ import time
 
 from geometry_msgs.msg import Pose
 
-from compapy.scripts.CoMPaPyRobust import CoMPaPyRobust
+from compapy.scripts.MyCoMPaPy import MyCoMPaPy
 from compapy.scripts.utils import setup_logger
 from compapy.scripts.socket_interface.frame_conversion import link8_in_base, ee_in_base
 
@@ -21,7 +21,7 @@ def main(
 ):
     saving_dir = Path('logs') / str(time.strftime("%Y%m%d_%H%M%S"))
     saving_dir.mkdir(exist_ok=True, parents=True)
-    compapy = CoMPaPyRobust(
+    compapy = MyCoMPaPy(
         log_file=saving_dir / 'compapy.log',
         save_planning_res=True
     )
@@ -40,6 +40,7 @@ def main(
             data = data.decode('utf-8')
             logger.info(f'received {data!r}')
             success = False
+            error_msg = ''
             if data == '>exit<':
                 logger.info('closing client socket - bye')
                 break
@@ -52,7 +53,7 @@ def main(
                     # example:
                     # data='>move<>0.561<>-0.487<>0.348<>2.786<>-0.586<>0.509<'
                     # target_pose_ee_in_base=[0.561, -0.487, 0.348, 2.786, -0.586, 0.509]
-                    #   IMPORTANT: pose of the tip of the end-effector relative to the robot base
+                    #   IMPORTANT: pose of the tip of the end-effector (not link8!) relative to the robot base
                     #   IMPORTANT: Rot-Vec, not RPY/Euler!
 
                     target_pose_l8_in_base = link8_in_base(ee_in_base=target_pose_ee_in_base)
@@ -62,13 +63,11 @@ def main(
                     target_pose.position.y = target_pose_l8_in_base[1]
                     target_pose.position.z = target_pose_l8_in_base[2]
 
-                    # todo: directly from rot_vec to quaternion
                     rot_vec = target_pose_l8_in_base[3:6]
-                    logger.debug(f'l8: rot_vec = {rot_vec}')
-                    euler = Rotation.from_rotvec(rot_vec).as_euler('xyz')
-                    logger.debug(f'l8: euler (external rad) = {euler}')
-                    euler_deg = [np.rad2deg(e) for e in euler]
-                    logger.debug(f'l8: euler (external deg) = {euler_deg}')
+                    logger.debug(f'l8: rot_vec = {[round(e, 3) for e in rot_vec]}')
+                    euler_rad = Rotation.from_rotvec(rot_vec).as_euler('xyz')
+                    logger.debug(f'l8: euler = {[round(np.rad2deg(e), 1) for e in euler_rad]} (ext deg)')
+
                     q = Rotation.from_rotvec(rot_vec).as_quat()
 
                     target_pose.orientation.x = q[0]
@@ -80,11 +79,12 @@ def main(
                         # todo success = compapy.teleport(target_pose)
                         raise NotImplementedError
                     else:
-                        success = compapy.move_l(target_pose)
+                        success = compapy.my_move(target_pose)
 
                 except Exception as e:
-                    logger.error(f'[move] data=[{data}] exception={e}')
-                    # todo: write failure to PC socket
+                    msg = f'[move] exception=[{e}] data=[{data}]'
+                    logger.error(msg)
+                    error_msg += f' {msg} '
 
             elif '>gripper<' in data:
                 if data == '>gripper<>1<':
@@ -96,8 +96,9 @@ def main(
                         else:
                             success = compapy.open_gripper()
                     except Exception as e:
-                        logger.error(f'[open-gripper] exception={e}')
-                        # todo: write failure to PC socket
+                        msg = f'[open-gripper] exception=[{e}]'
+                        logger.error(msg)
+                        error_msg += f' {msg} '
                 elif data == '>gripper<>0<':
                     logger.info('trying to close')
                     try:
@@ -107,16 +108,19 @@ def main(
                         else:
                             success = compapy.close_gripper()
                     except Exception as e:
-                        logger.error(f'[close-gripper] exception={e}')
-                        # todo: write failure to PC socket
+                        msg = f'[close-gripper] exception=[{e}]'
+                        logger.error(msg)
+                        error_msg += f' {msg} '
                 else:
-                    raise NotImplementedError(f'about gripper: data={data}')
-                    # todo: write failure to PC socket
+                    msg = f'[gripper]: data=[{data}] not supported'
+                    logger.error(msg)
+                    error_msg += f' {msg} '
                 logger.info(f'width_mm = {compapy.get_gripper_width_mm():.1f}')
 
             else:
-                raise NotImplementedError(f'data={data}')
-                # todo: write failure to PC socket
+                msg = f'data=[{data}] not supported'
+                logger.error(msg)
+                error_msg += f' {msg} '
 
             l8_pose = compapy.get_pose()
 
@@ -128,26 +132,24 @@ def main(
             l8_in_base_out[2] = l8_pose.position.z
 
             logger.debug('reading out values')
-            logger.debug(f'l8_in_base_out = {[round(e, 2) for e in l8_in_base_out[:3]]}')
+            logger.debug(f'l8_position_in_base_out = {[round(e, 2) for e in l8_in_base_out[:3]]}')
 
-            # todo: directly from quat to rotvec
-            roll, pitch, yaw = Rotation.from_quat([
+            r_out = Rotation.from_quat([
                 l8_pose.orientation.x,
                 l8_pose.orientation.y,
                 l8_pose.orientation.z,
                 l8_pose.orientation.w
-            ]).as_euler('xyz')
-
-            logger.debug(f'r_base_to_l8 [euler-deg] = {[round(np.rad2deg(e), 2) for e in [roll, pitch, yaw]]}')
-            rot_vec = Rotation.from_euler('xyz', [roll, pitch, yaw]).as_rotvec()
-            l8_in_base_out[3:6] = rot_vec
+            ])
+            logger.debug(f'r_base_to_l8 = {[round(e, 2) for e in r_out.as_euler("xyz", degrees=True)]} (euler-deg)')
+            l8_in_base_out[3:6] = r_out.as_rotvec()
 
             ee_in_base_out = ee_in_base(l8_in_base_out)
 
             logger.debug(f'ee_in_base_out: {[round(e, 2) for e in ee_in_base_out]}')
             logger.debug(
-                f'euler [ee out ext deg]: '
+                f'r_base_to_ee = '
                 f'{[round(e, 2) for e in Rotation.from_rotvec(ee_in_base_out[3:]).as_euler("xyz", degrees=True)]}'
+                f'(euler-deg)'
             )
 
             def to_str(
@@ -165,11 +167,14 @@ def main(
                 joints_rad=compapy.get_joints(),
                 tcp_pose=ee_in_base_out,
             )
+            if error_msg:
+                success = False
+                logger.error(f'error_msg: {error_msg}')
             if not success:
-                state_str = 'error ' + state_str
-            state_bytes = bytes(state_str, 'utf-8')
+                state_str = f'error: {error_msg} || state_str = {state_str}'
 
-            logger.info(f'todo: send back success = [{success}] to cmd [{data}]')
+            logger.debug(f'state_str = {state_str}')
+            state_bytes = bytes(state_str, 'utf-8')
 
             s.sendall(state_bytes)
             time.sleep(0.1)
