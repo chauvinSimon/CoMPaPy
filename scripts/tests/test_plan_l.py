@@ -59,7 +59,11 @@ def plan_or_move_l_in_target_space(
     failure_msgs = []
     failure_angles = []
     successful_multiple_plan_l = 0
+    successful_fallback_plan_j = 0
+    saver_resolution_offsets = []
+    saver_jump_offsets = []
 
+    # sample a B and try to plan A->B
     for i in range(n_samples):
         x = np.random.uniform(x_min, x_max)
         y = np.random.uniform(y_min, y_max)
@@ -103,6 +107,8 @@ def plan_or_move_l_in_target_space(
                 if i_trial > 0:
                     compapy.logger.info('Hurra! trying multiple params for `plan_l` was worth')
                     successful_multiple_plan_l += 1
+                    saver_resolution_offsets.append(resolution_m_offset)
+                    saver_jump_offsets.append(jump_threshold_offset)
                 break
             if fallback_plan_j:
                 compapy.logger.warning('trying to fallback with `plan_j` ...')
@@ -110,6 +116,7 @@ def plan_or_move_l_in_target_space(
                     target_pose=target_pose
                 )
                 if success_plan:
+                    successful_fallback_plan_j += 1
                     compapy.logger.info('Hurra! managed to fallback!')
 
         if not success_plan:
@@ -149,7 +156,19 @@ def plan_or_move_l_in_target_space(
     else:
         print(f'no problem in [{n_samples}] samples :)')
 
-    print(f'successful_multiple_plan_l = [{successful_multiple_plan_l}]')
+    print(f'successful_fallback_plan_j = [{successful_fallback_plan_j}]')
+
+    print(f'successful_multiple_plan_l = [{successful_multiple_plan_l}]:')
+    if successful_multiple_plan_l > 0:
+        print(f'\tsaver_resolution_offsets = {saver_resolution_offsets}')
+        print(f'\tsaver_jump_offsets = {saver_jump_offsets}')
+        for name, data in [
+            ('resolution_offsets', saver_resolution_offsets),
+            ('jump_offsets', saver_jump_offsets),
+        ]:
+            plt.hist(data)
+            plt.title('saver_resolution_offsets')
+            plt.show()
 
 
 def main():
