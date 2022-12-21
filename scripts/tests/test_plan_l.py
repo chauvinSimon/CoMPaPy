@@ -150,7 +150,7 @@ def plan_or_move_l_in_target_space(
         )
         plt.xlim(xmin=rz_deg_min, xmax=rz_deg_max)
         plt.title(f'{len(failure_angles)} ({percent_str}) failure_angles {bounds_str} (deg)')
-        plt.savefig('failures_.png')
+        plt.savefig('failures.png')
         plt.show()
 
     else:
