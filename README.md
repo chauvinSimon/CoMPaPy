@@ -13,7 +13,7 @@ with [moveit](https://ros-planning.github.io/moveit_tutorials/doc/getting_starte
 
 - using only **official** and **maintained** repos: [`franka_ros`](https://frankaemika.github.io/docs/franka_ros.html)
   and [`MoveIt`](https://ros-planning.github.io/moveit_tutorials/doc/getting_started/getting_started.html)
-- two modes: "simulated" and "real" panda
+- two modes: `simulated` and `real` panda
 - no `cpp`, just `python`
 
 ## :warning: limitations
@@ -22,7 +22,7 @@ with [moveit](https://ros-planning.github.io/moveit_tutorials/doc/getting_starte
 - only tested on the following combination
     - (`ubuntu 20`, `noetic`, `libfranka 0.10.0`, `franka_ros 0.10.1`)
     - _todo: docker_
-- require switching to a real-time kernel
+- require switching to a real-time kernel to control the `real` panda
 - require lots of installations
     - _todo: docker_
 - only basic actions
@@ -34,7 +34,7 @@ with [moveit](https://ros-planning.github.io/moveit_tutorials/doc/getting_starte
 - may require some parameter tuning
     - e.g. `compute_cartesian_path()` params in `move_l`
 - control `panda_link8` instead of the gripper :weary:
-    - todo: `https://answers.ros.org/question/334902/moveit-control-gripper-instead-of-panda_link8-eff/`
+    - todo: [ros.org/question/334902](https://answers.ros.org/question/334902/moveit-control-gripper-instead-of-panda_link8-eff/
 
 ## :wrench: installation
 
@@ -43,7 +43,7 @@ notes
 - installing `libfranka` and `franka_ros` with `sudo apt install ros-noetic- ...` is not an option at the time of
   writing: it gives incompatible versions
 
-create a dir for all packages
+create a directory for all packages
 
 ```
 mkdir -p ~/catkin_ws/src
