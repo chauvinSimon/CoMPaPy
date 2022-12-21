@@ -2,9 +2,18 @@ obstacles:
   config_path: 'config/obstacles.json'
 
 move_l:
-  resolution_m: 0.005
   speed: 0.05
+
+  resolution_m: 0.005
+  min_resolution_m_offset: -0.005
+  max_resolution_m_offset: 0.005
+
   jump_threshold: 2.0
+  min_jump_threshold_offset: -2.0
+  max_jump_threshold_offset: 2.0
+
+move_j:
+  speed: 0.05  # todo: set it. With `set_max_velocity_scaling_factor()`?
 
 open_gripper:
   width: 0.08
