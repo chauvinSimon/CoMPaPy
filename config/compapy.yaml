@@ -31,3 +31,6 @@ close_gripper:
   epsilon_outer: 0.01
   speed: 0.1
   force: 20
+
+my_move:
+  n_trials_plan_l: 10

@@ -71,7 +71,10 @@ class MyCoMPaPy(CoMPaPy):
             return False, f'cannot process target_pose = {target_pose}'
 
         error_msg = ''
-        success_move, move_error_msg = self.move_l(target_pose=target_pose)
+        success_move, move_error_msg = self.move_l(
+            target_pose=target_pose,
+            n_trials=self.config['my_move']['n_trials_plan_l']
+        )
         if move_error_msg:
             error_msg += f'`move_l` failed: [{move_error_msg}] || trying fallback ... '
 
