@@ -597,8 +597,9 @@ what can help:
 <details>
   <summary>:woozy_face: the computed `plan` includes strange joint moves</summary>
 
-| ![joints.gif](media/joints.gif) | |:--:| | *left*: `joint_1` rotates first `cw` and then `ccw`, causing warnings /
-errors during the execution of the trajectory. *right*: `joint_1` keeps rotating in only one direction |
+| ![joints.gif](media/joints.gif) | 
+|:--:| 
+| *__left__: `joint_1` rotates first `cw` and then `ccw`, causing warnings or errors during the execution of the trajectory. **right**: `joint_1` keeps rotating in only one direction* |
 
 what can help:
 
@@ -613,16 +614,23 @@ what can help:
         - e.g. freeze `joint_3` and `joint_5`
         - _todo: I did not find how to do it_
     - alternatively, but not optimal, reduce the bounds in `joint_limits.yaml`
-        - [`~/catkin_ws/src/franka_ros/franka_description/robots/panda/joint_limits.yaml`](https://github.com/frankaemika/franka_ros/blob/noetic-devel/franka_description/robots/panda/joint_limits.yaml)
-        - :warning: **make sure all joints are in their intervals before starting `moveit` and using the `execution`
-          mode**
+        - `moveit` uses the limit defined in [`~/catkin_ws/src/franka_ros/franka_description/robots/panda/joint_limits.yaml`](https://github.com/frankaemika/franka_ros/blob/noetic-devel/franka_description/robots/panda/joint_limits.yaml)
+        - :warning: **make sure all joints are in their intervals before starting `moveit` in the `execution` mode!**
         - note: [`fr3`](https://github.com/frankaemika/franka_ros/blob/develop/franka_description/robots/fr3/joint_limits.yaml) is more constrained than [`panda`](https://github.com/frankaemika/franka_ros/blob/develop/franka_description/robots/panda/joint_limits.yaml)
-        - for instance:
-            - use `rqt_joint_trajectory_controller` to move joint values e.g. to `0`
-            - then stop `moveit`
-            - then set the new lighter joint limits
-            - then start `moveit` and select `execution` mode
-            - _as said, not optimal!_
+        - here a hacky method to start the arm as a `5`-dof arm:
+          - clear changes in `joint_limits.yaml`
+            - `cd ~/catkin_ws/src/franka_ros`
+            - `git checkout franka_description/robots/panda/joint_limits.yaml`
+          - move the `7`-dof robot to a valid pose for `5`-dof:
+            - set `programming` mode
+            - `roslaunch compapy real.launch robot_ip:=172.16.0.2`
+            - move the robot so that `joint_3` and `joint_5` are at `0` (align the arrows printed on the arm)
+            - make sure these two joints are at `0` with `rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller`
+            - quit `rviz` and kill `real.launch`
+          - start the robot with the `5`-dof configuration
+            - copy the content of `compapy/config/joint_limits_fr3_noj3_noj5.yaml` to `joint_limits.yaml`
+            - set `execution` mode
+            - `roslaunch compapy real.launch robot_ip:=172.16.0.2`
 
 </details>
 
