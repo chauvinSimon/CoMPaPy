@@ -421,6 +421,7 @@ use this `rqt` tool:
   <summary>:plate_with_cutlery: ground_plane</summary>
 
 about `ground_plane`
+
 - the default `world` contains a `ground_plane`
 - it acts as an obstacle and prevents the robot from reaching negative `z`
 - it is located in `/usr/share/gazebo-11/worlds/empty.world`
@@ -457,6 +458,41 @@ rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller
   <summary>:heavy_check_mark: expected result</summary>
 
 ![gazebo_rqt.gif](media/gazebo_rqt.gif)
+
+</details>
+
+### :straight_ruler: read cartesian coordinates
+
+run only one of
+
+```
+roslaunch panda_moveit_config franka_control.launch robot_ip:=172.16.0.2 load_gripper:=true
+roslaunch compapy real.launch robot_ip:=172.16.0.2
+```
+
+alternatively to the real robot, `gazebo` can be used
+
+```
+roslaunch panda_moveit_config demo_gazebo.launch
+```
+
+- in `rviz` add [`tf`](http://wiki.ros.org/tf) under `Panels`
+- under `Frames`, `panda_EE` gives the current transform from the base (`world`) to the end effector
+- move the robot
+    - either manually in `programming` mode
+    - or by commands in `execution` mode
+- read the updated transform
+
+alternatively, without `rviz`:
+
+```bash
+~/workspaces_ros_noetic/ewaste/rob_ws$ rosrun tf tf_echo /panda_link0 /panda_EE
+```
+
+<details>
+  <summary>:heavy_check_mark: expected result</summary>
+
+![tf.gif](media/tf.gif)
 
 </details>
 
