@@ -354,8 +354,9 @@ in `rviz`:
 
 in `execution` mode
 
+run one of
+
 ```
-# run only one of
 roslaunch franka_gripper franka_gripper.launch robot_ip:=172.16.0.2
 roslaunch franka_control franka_control.launch robot_ip:=172.16.0.2
 roslaunch panda_moveit_config franka_control.launch robot_ip:=172.16.0.2 load_gripper:=true
@@ -368,7 +369,7 @@ alternatively to the real robot, `gazebo` can be used
 roslaunch panda_moveit_config demo_gazebo.launch
 ```
 
-then
+
 
 ```
 # close the gripper
@@ -435,12 +436,12 @@ two solutions
 ```xml
 <?xml version="1.0" ?>
 <sdf version="1.5">
-  <world name="default">
-    <!-- A global light source -->
-    <include>
-      <uri>model://sun</uri>
-    </include>
-  </world>
+    <world name="default">
+        <!-- A global light source -->
+        <include>
+            <uri>model://sun</uri>
+        </include>
+    </world>
 </sdf>
 ```
 
@@ -463,7 +464,7 @@ rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 
 ### :straight_ruler: read cartesian coordinates
 
-run only one of
+run one of
 
 ```
 roslaunch panda_moveit_config franka_control.launch robot_ip:=172.16.0.2 load_gripper:=true
@@ -475,6 +476,8 @@ alternatively to the real robot, `gazebo` can be used
 ```
 roslaunch panda_moveit_config demo_gazebo.launch
 ```
+
+then
 
 - in `rviz` add [`tf`](http://wiki.ros.org/tf) under `Panels`
 - under `Frames`, `panda_EE` gives the current transform from the base (`world`) to the end effector
@@ -594,9 +597,8 @@ what can help:
 <details>
   <summary>:woozy_face: the computed `plan` includes strange joint moves</summary>
 
-| ![joints.gif](media/joints.gif) |
-|:--:|
-| *left*: `joint_1` rotates first `cw` and then `ccw`, causing warnings / errors during the execution of the trajectory. *right*: `joint_1` keeps rotating in only one direction |
+| ![joints.gif](media/joints.gif) | |:--:| | *left*: `joint_1` rotates first `cw` and then `ccw`, causing warnings /
+errors during the execution of the trajectory. *right*: `joint_1` keeps rotating in only one direction |
 
 what can help:
 
