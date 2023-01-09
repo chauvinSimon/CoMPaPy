@@ -118,6 +118,9 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
                     self.logger.info(f'trial [{i_trial}]/[{n_trials - 1}] retrying with other params helped!')
                 break
             self.logger.warning(f'trial [{i_trial}]/[{n_trials - 1}] failed: fraction=[{fraction:.1%}]')
+            # # todo: run the not-complete planned path to check, at the end of the plan, which joint reaches the limit:
+            # exe_success = self.exe_plan(plan)
+            # self.logger.warning(f'trial [{i_trial}]/[{n_trials - 1}] execution: success={exe_success}')
 
         self._save_plan(target_pose=target_pose, plan=plan)
 
