@@ -34,10 +34,10 @@
       "name": "conv_belt",
       "type": "static_box",
       "x": 0.60,
-      "y": 0.25,
+      "y": 0.02,
       "z": 0.02,
       "size_x": 1.0,
-      "size_y": 1.0,
+      "size_y": 0.55,
       "size_z": 0.05
     },
     {
