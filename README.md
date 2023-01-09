@@ -303,6 +303,13 @@ roslaunch franka_visualization franka_visualization.launch robot_ip:=172.16.0.2 
 roslaunch franka_example_controllers move_to_start.launch robot_ip:=172.16.0.2
 ```
 
+<details>
+  <summary>note</summary>
+
+`franka_visualization.launch` raises the following, but the command can still be executed: `Robot semantic description not found. Did you forget to define or remap '/robot_description_semantic'?`
+
+</details>
+
 ### :tv: `rviz` visualization
 
 in `programming` mode
@@ -313,6 +320,13 @@ roslaunch franka_visualization franka_visualization.launch robot_ip:=172.16.0.2 
 
 - move the cooperative robot manually (press the two buttons on the gripper)
 - see the corresponding motion in `rviz`
+
+<details>
+  <summary>note</summary>
+
+`franka_visualization.launch` raises the following, but the command can still be executed: `Robot semantic description not found. Did you forget to define or remap '/robot_description_semantic'?`
+
+</details>
 
 ### :computer_mouse: `rviz` control
 
@@ -325,6 +339,7 @@ roslaunch panda_moveit_config franka_control.launch robot_ip:=172.16.0.2 load_gr
 in `rviz`:
 
 - add the `MotionPlanning` plugin
+- in `Planning Request`, enable `Query Goal State`
 - drag the interactive marker to some the goal state
 - click `Plan` and the `Execute`
 - try different planning settings (cartesian path, speed, planning pipeline ...)
@@ -374,14 +389,14 @@ in `execution` mode
 roslaunch compapy real.launch robot_ip:=172.16.0.2
 ```
 
-install and run `rqt_joint_trajectory_controller`
+install and run [`rqt_joint_trajectory_controller`](http://wiki.ros.org/rqt_joint_trajectory_controller)
 
 ```
 sudo apt install ros-noetic-rqt-joint-trajectory-controller
 rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller
 ```
 
-in the two drop down options select `/controller_manager` and `effort_joint_trajectory_contoller`
+in the two drop down options select `/controller_manager` and `effort_joint_trajectory_contoller` and then press the red button to "enable sending commands to the controller"
 
 use this `rqt` tool:
 
@@ -539,11 +554,9 @@ what can help:
 <details>
   <summary>:woozy_face: the computed `plan` includes strange joint moves</summary>
 
-- left: `joint_1` rotates first `cw` and then `ccw`
-    - this may cause warnings / errors during the execution of the trajectory
-- right: `joint_1` keeps rotating in only one direction
-
-![joints.gif](media/joints.gif)
+| ![joints.gif](media/joints.gif) |
+|:--:|
+| *left*: `joint_1` rotates first `cw` and then `ccw`, causing warnings / errors during the execution of the trajectory. *right*: `joint_1` keeps rotating in only one direction |
 
 what can help:
 
