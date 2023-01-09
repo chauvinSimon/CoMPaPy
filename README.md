@@ -624,8 +624,9 @@ what can help:
           - move the `7`-dof robot to a valid pose for `5`-dof:
             - set `programming` mode
             - `roslaunch compapy real.launch robot_ip:=172.16.0.2`
-            - move the robot so that `joint_3` and `joint_5` are at `0` (align the arrows printed on the arm)
+            - manually move the robot so that `joint_3` and `joint_5` are at `0` (align the arrows printed on the arm)
             - make sure these two joints are at `0` with `rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller`
+            - manually move the other joints roughly to the middle of their ranges
             - quit `rviz` and kill `real.launch`
           - start the robot with the `5`-dof configuration
             - copy the content of `compapy/config/joint_limits_fr3_noj3_noj5.yaml` to `joint_limits.yaml`
