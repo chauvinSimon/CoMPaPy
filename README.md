@@ -306,7 +306,9 @@ roslaunch franka_example_controllers move_to_start.launch robot_ip:=172.16.0.2
 <details>
   <summary>note</summary>
 
-`franka_visualization.launch` raises the following, but the command can still be executed: `Robot semantic description not found. Did you forget to define or remap '/robot_description_semantic'?`
+`franka_visualization.launch` raises the following, but the command can still be executed
+
+> `Robot semantic description not found. Did you forget to define or remap '/robot_description_semantic'?`
 
 </details>
 
@@ -324,7 +326,9 @@ roslaunch franka_visualization franka_visualization.launch robot_ip:=172.16.0.2 
 <details>
   <summary>note</summary>
 
-`franka_visualization.launch` raises the following, but the command can still be executed: `Robot semantic description not found. Did you forget to define or remap '/robot_description_semantic'?`
+`franka_visualization.launch` raises the following, but motion in `rviz` can still be seen
+
+> `Robot semantic description not found. Did you forget to define or remap '/robot_description_semantic'?`
 
 </details>
 
