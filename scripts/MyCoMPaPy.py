@@ -65,9 +65,11 @@ class MyCoMPaPy(CoMPaPy):
 
     def my_move(
             self,
-            target_pose: Pose
+            target_pose: Pose,
+            process_target: bool = True
     ) -> Tuple[bool, str]:
-        target_pose = self.process_target(target_pose=target_pose)
+        if process_target:
+            target_pose = self.process_target(target_pose=target_pose)
         if target_pose is None:
             return False, f'cannot process target_pose = {target_pose}'
 

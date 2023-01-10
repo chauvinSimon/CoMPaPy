@@ -28,7 +28,8 @@ def state_to_str(
 
 def main(
         teleport: bool = False,
-        ignore_gripper: bool = False
+        ignore_gripper: bool = False,
+        process_target: bool = True,
 ):
     saving_dir = Path('logs') / str(time.strftime("%Y%m%d_%H%M%S"))
     saving_dir.mkdir(exist_ok=True, parents=True)
@@ -90,7 +91,10 @@ def main(
                         # todo success = compapy.teleport(target_pose)
                         raise NotImplementedError
                     else:
-                        success, move_err_msg = compapy.my_move(target_pose)
+                        success, move_err_msg = compapy.my_move(
+                            target_pose=target_pose,
+                            process_target=process_target
+                        )
                         if move_err_msg:
                             error_msg += f' move_err_msg=[{move_err_msg}] '
 
@@ -195,6 +199,13 @@ if __name__ == '__main__':
                         help='speed up the simulation by [plan+teleport] instead of [plan+execute]')
     parser.add_argument('--ignore_gripper', action='store_true',
                         help='speed up the simulation by not opening/closing the gripper')
+    parser.add_argument('--ignore_target_processing', action='store_true',
+                        help='disable the specific processing '
+                             'e.g. make sure the gripper stays vertical and wrap its yaw angle to a particular range')
     args = parser.parse_args()
 
-    main(teleport=args.teleport, ignore_gripper=args.ignore_gripper)
+    main(
+        teleport=args.teleport,
+        ignore_gripper=args.ignore_gripper,
+        process_target=not args.ignore_target_processing,
+    )
