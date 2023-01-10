@@ -34,12 +34,13 @@ class MyCoMPaPy(CoMPaPy):
             target_pose: geometry_msgs.msg.Pose
     ) -> Optional[geometry_msgs.msg.Pose]:
         target_rz_rad = self.rz_from_q(target_pose.orientation)
-        self.logger.info(f'{np.rad2deg(target_rz_rad):.1f} = target_rz')
         if target_rz_rad is None:
             return None
+        self.logger.info(f'{np.rad2deg(target_rz_rad):.1f} = target_rz (l8)')
 
         # conversion between link8 and ee
         target_rz_ee_rad = target_rz_rad + np.deg2rad(45)
+        self.logger.info(f'{np.rad2deg(target_rz_ee_rad):.1f} = target_rz (ee)')
 
         # in my particular setting, plan are successful for rz_ee in [-100°, 100°].
         # also, I can exploit the 90° rotation symmetry of my specific scenario
