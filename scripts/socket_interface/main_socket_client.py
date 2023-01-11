@@ -40,8 +40,7 @@ def main(
 
     logger = setup_logger(name=Path(__file__).name, log_file=saving_dir / 'socket.log')
 
-    host = "192.168.125.5"
-    #  host = "127.0.0.1"
+    host = "127.0.0.1"
     port = 65432
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
