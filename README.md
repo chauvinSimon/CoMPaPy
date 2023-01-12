@@ -574,6 +574,12 @@ in `pycharm`, with `Working directory` set to `~/catkin_ws/src/compapy`
 python scripts/main_example.py
 ```
 
+#### :bug: troubleshooting
+
+forgetting to `roslaunch` the `.launch` file will cause this error
+- > `[ERROR] [1673445824.345144228]: [registerPublisher] Failed to contact master at [localhost:11311]. Retrying...`
+- `roslaunch` starts `roscore` (and therefore a "`ROS` master")
+
 ### :thinking: known issues
 
 <details>
