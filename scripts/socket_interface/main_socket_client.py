@@ -44,7 +44,9 @@ def main(
     port = 65432
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.setblocking(True)  # equivalent to sock.settimeout(None), otherwise "socket.timeout: timed out"
         s.connect((host, port))
+        compapy.logger.info(f'socket timeout = {s.gettimeout()}')
 
         while True:
             data = s.recv(1024)
