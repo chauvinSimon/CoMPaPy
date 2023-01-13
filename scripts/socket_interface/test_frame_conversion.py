@@ -7,7 +7,7 @@ import pytest
 from scipy.spatial.transform import Rotation
 
 
-from robot.panda.frame_conversion import link8_in_base, ee_in_base
+from compapy.scripts.socket_interface.frame_conversion import link8_in_base, ee_in_base
 
 
 @pytest.mark.parametrize("ee_in_base, l8_in_base", [
