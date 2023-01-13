@@ -237,7 +237,7 @@ I prefer to run python scripts from `pycharm` :blush:
 
 :warning: keep the emergency button close to you :rescue_worker_helmet:
 
-follow the [fci](https://frankaemika.github.io/docs/getting_started.html) instructions to configure `fci`
+the first time: follow the [fci](https://frankaemika.github.io/docs/getting_started.html) instructions to configure `fci`
 
 switch on the robot
 
@@ -250,7 +250,7 @@ in [`http://172.16.0.2/desk/`](http://172.16.0.2/desk/)
 
 in a terminal
 
-- `source_catkin` (alias)
+- `source_catkin` (the alias defined in a previous section)
 
 ## :stethoscope: verifications
 
@@ -302,6 +302,9 @@ roslaunch franka_visualization franka_visualization.launch robot_ip:=172.16.0.2 
 # move a bit the gripper from its start pose before running this
 roslaunch franka_example_controllers move_to_start.launch robot_ip:=172.16.0.2
 ```
+
+the pose defined in [`start_pose.yaml`](https://github.com/frankaemika/franka_ros/blob/develop/franka_control/config/start_pose.yaml) is reached
+- the `max_dq` parameter, in `rad/s`, is [used to control the duration of the move](https://github.com/frankaemika/franka_ros/blob/develop/franka_example_controllers/scripts/move_to_start.py#L33), hence the speed
 
 <details>
   <summary>note</summary>
@@ -634,6 +637,7 @@ what can help:
             - make sure these two joints are at `0` with `rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller`
             - manually move the other joints roughly to the middle of their ranges
             - quit `rviz` and kill `real.launch`
+            - alternatively, [`move_to_start.launch`](https://github.com/frankaemika/franka_ros/blob/develop/franka_example_controllers/scripts/move_to_start.py) in [`franka_example_controllers`](https://github.com/frankaemika/franka_ros/tree/develop/franka_example_controllers) can be used
           - start the robot with the `5`-dof configuration
             - copy the content of `compapy/config/joint_limits_fr3_noj3_noj5.yaml` to `joint_limits.yaml`
             - set `execution` mode
