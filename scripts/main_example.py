@@ -1,4 +1,5 @@
 import copy
+import time
 
 from compapy.scripts.CoMPaPy import CoMPaPy
 
@@ -14,6 +15,8 @@ def main():
     target_pose.position.z += 0.1
 
     compapy.move_j(target_pose)
+    time.sleep(1)
+    compapy.move_j(init_pose)
 
 
 if __name__ == '__main__':
