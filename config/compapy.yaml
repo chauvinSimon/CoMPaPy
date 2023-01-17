@@ -2,7 +2,7 @@ obstacles:
   config_path: 'config/obstacles.json'
 
 move_l:
-  speed: 0.05
+  speed: 0.2
 
   resolution_m: 0.005
   min_resolution_m_offset: -0.005
@@ -26,9 +26,9 @@ close_gripper:
   # goal.epsilon.outer = 0.005
   # goal.speed = 0.1
   # goal.force = 5
-  width: 0.0
-  epsilon_inner: 0.01
-  epsilon_outer: 0.01
+  width: 0.04
+  epsilon_inner: 0.05
+  epsilon_outer: 0.05
   speed: 0.1
   force: 20
 
