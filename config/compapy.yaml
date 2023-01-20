@@ -20,17 +20,17 @@ open_gripper:
   speed: 0.4
 
 close_gripper:
-  # todo: compare with https://github.com/frankaemika/franka_ros/issues/256
-  # goal.width = 0.022
-  # goal.epsilon.inner = 0.005
-  # goal.epsilon.outer = 0.005
-  # goal.speed = 0.1
-  # goal.force = 5
-  width: 0.04
-  epsilon_inner: 0.05
-  epsilon_outer: 0.05
-  speed: 0.1
-  force: 20
+  # these params should work for both
+  #   - no-object present -> full close
+  #   - object present
+  # (a bit hacky) to cope with both with a margin, one can play with the `width` and `epsilon_`:
+  #   - for a Xcm object: width=X/2 and epsilon=X/2+margin
+  width: 0.03
+  epsilon_inner: 0.04  # max tolerated deviation when the actual grasped width is smaller than the commanded grasp width
+  epsilon_outer: 0.04  # max tolerated deviation when the actual grasped width is larger than the commanded grasp width
+
+  speed: 0.1  # Closing speed [m/s]
+  force: 20  # Grasping (continuous) force [N]
 
 my_move:
   n_trials_plan_l: 10

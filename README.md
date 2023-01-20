@@ -542,6 +542,8 @@ python scripts/tests/test_eef_rotation.py
 
 define obstacles in [`obstacles.json`](config/obstacles.json)
 
+adjust the parameters for `close_gripper()`, depending on the width of the object to grasp, in [`compapy.yaml`](config/compapy.yaml)
+
 visualize them with
 
 ```
