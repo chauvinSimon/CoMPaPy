@@ -5,7 +5,7 @@ from pathlib import Path
 import rospy
 from scipy.spatial.transform import Rotation
 import time
-from typing import Dict, Optional, Tuple, List
+from typing import Dict, Optional, Tuple, List, Union
 
 import franka_gripper.msg
 import geometry_msgs
@@ -69,16 +69,19 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
     def move_j(
             self,
-            target_pose: Pose
+            target: Union[Pose, JointState]
     ) -> Tuple[bool, str]:
-        plan_success, plan_traj, plan_error_code = self.plan_j(target_pose)
+        plan_success, plan_traj, plan_error_code = self.plan_j(target)
         if not plan_success:
             err_msg = 'planning failed'
             self.logger.error(err_msg)
             return False, err_msg
 
         exe_success = self.exe_plan(plan_traj)
-        self._compute_move_error(target_pose=target_pose, move_name='move_j')
+
+        if isinstance(target, Pose):
+            self._compute_move_error(target_pose=target, move_name='move_j')
+
         if not exe_success:
             error_msg = 'execution of plan failed'
             self.logger.error(error_msg)
@@ -140,9 +143,9 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
     def plan_j(
             self,
-            target_pose: Pose,
+            target: Union[Pose, JointState],
     ) -> Tuple[bool, RobotTrajectory, str]:
-        plan_success, plan_traj, plan_time, plan_error_code = self.move_group.plan(target_pose)
+        plan_success, plan_traj, plan_time, plan_error_code = self.move_group.plan(target)
         self._show_plan(plan_traj)
         self.logger.info(
             f'plan_success = [{plan_success}] in plan_time = [{plan_time}] with plan_error_code = [{plan_error_code}]'

@@ -83,7 +83,7 @@ class MyCoMPaPy(CoMPaPy):
 
         if not success_move:
             self.logger.warning('falling back after `move_l` failed')
-            success_move, move_error_msg = self.move_j(target_pose=target_pose)
+            success_move, move_error_msg = self.move_j(target=target_pose)
             if move_error_msg:
                 error_msg += f' `move_j` failed: [{move_error_msg}]'
 

@@ -26,7 +26,7 @@ def plan_or_move_l_in_target_space(
     target_init_pose = list_to_pose(target_init_pose)
     # target_init_pose = compapy.move_group.get_current_pose().pose
 
-    success, error_msg = compapy.move_j(target_pose=target_init_pose)
+    success, error_msg = compapy.move_j(target=target_init_pose)
     if not success:
         raise RuntimeError(f'cannot reach init pose: {error_msg}')
 
@@ -113,7 +113,7 @@ def plan_or_move_l_in_target_space(
             if fallback_plan_j:
                 compapy.logger.warning('trying to fallback with `plan_j` ...')
                 success_plan, plan, _ = compapy.plan_j(
-                    target_pose=target_pose
+                    target=target_pose
                 )
                 if success_plan:
                     successful_fallback_plan_j += 1
