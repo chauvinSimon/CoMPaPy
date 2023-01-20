@@ -623,27 +623,20 @@ what can help:
       the [`MoveIt setup assistant`](https://ros-planning.github.io/moveit_tutorials/doc/setup_assistant/setup_assistant_tutorial.html)
       where not all joints are used
         - e.g. freeze `joint_3` and `joint_5`
-        - _todo: I did not find how to do it_
-    - alternatively, but not optimal, reduce the bounds in `joint_limits.yaml`
-        - `moveit` uses the limit defined in [`~/catkin_ws/src/franka_ros/franka_description/robots/panda/joint_limits.yaml`](https://github.com/frankaemika/franka_ros/blob/noetic-devel/franka_description/robots/panda/joint_limits.yaml)
-        - :warning: **make sure all joints are in their intervals before starting `moveit` in the `execution` mode!**
+        - _todo: I could not find how to do it_
+    - alternatively, but not optimal, drastically reduce the range of `joint_3` and `joint_5` in `joint_limits.yaml`
+        - note: `moveit` uses the limits defined in [`~/catkin_ws/src/franka_ros/franka_description/robots/panda/joint_limits.yaml`](https://github.com/frankaemika/franka_ros/blob/noetic-devel/franka_description/robots/panda/joint_limits.yaml)
+        - :warning: **once `joint_limits.yaml` is adjusted, make sure all joints are in their intervals before starting `moveit` in the `execution` mode! Otherwise, the arm can strongly vibrate**
         - note: [`fr3`](https://github.com/frankaemika/franka_ros/blob/develop/franka_description/robots/fr3/joint_limits.yaml) is more constrained than [`panda`](https://github.com/frankaemika/franka_ros/blob/develop/franka_description/robots/panda/joint_limits.yaml)
-        - here a hacky method to start the arm as a `5`-dof arm:
+        - in `Execution` mode, run `python scripts/move_to_start_and_set_limits.py --dof=5`, which does the following:
           - clear changes in `joint_limits.yaml`
-            - `cd ~/catkin_ws/src/franka_ros`
-            - `git checkout franka_description/robots/panda/joint_limits.yaml`
-          - move the `7`-dof robot to a valid pose for `5`-dof:
-            - set `programming` mode
-            - `roslaunch compapy real.launch robot_ip:=172.16.0.2`
-            - manually move the robot so that `joint_3` and `joint_5` are at `0` (align the arrows printed on the arm)
-            - make sure these two joints are at `0` with `rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller`
-            - manually move the other joints roughly to the middle of their ranges
-            - quit `rviz` and kill `real.launch`
-            - alternatively, [`move_to_start.launch`](https://github.com/frankaemika/franka_ros/blob/develop/franka_example_controllers/scripts/move_to_start.py) in [`franka_example_controllers`](https://github.com/frankaemika/franka_ros/tree/develop/franka_example_controllers) can be used
-          - start the robot with the `5`-dof configuration
-            - copy the content of `compapy/config/joint_limits_fr3_noj3_noj5.yaml` to `joint_limits.yaml`
-            - set `execution` mode
-            - `roslaunch compapy real.launch robot_ip:=172.16.0.2`
+          - move the amr to a pose suitable for `5`-dof (`joint_5` = `joint_3` = `0.0`)
+            - note: this can also be achieved using [`move_to_start.launch`](https://github.com/chauvinSimon/compapy#popcorn-franka_example_controllers), or even manually:
+              - in `programming` mode, with `roslaunch compapy real.launch robot_ip:=172.16.0.2`, manually move the amr so that `joint_3` and `joint_5` are at `0` (align the arrows printed on the joints)
+              - make sure these two joints are at `0` with `rosrun rqt_joint_trajectory_controller rqt_joint_trajectory_controller`
+              - manually move the other joints roughly to the middle of their ranges
+              - quit `rviz` and kill `real.launch`
+          - limit the range of `joint_3` and `joint_5` in `joint_limits.yaml`
 
 </details>
 
