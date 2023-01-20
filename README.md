@@ -614,7 +614,7 @@ what can help:
 what can help:
 
 - check this [answer](https://www.franka-community.de/t/paths-planned-using-moveit-are-very-strange/2550/2)
-- use a different planner in `MoveIt`
+- use a different planner in `MoveIt` (usually done with the `pipeline` argument)
 - play with the [`jump_threshold`](https://github.com/ros-planning/moveit/issues/773) param
   of `compute_cartesian_path()`
 - **reduce the degrees of freedom** (dof) of the panda arm
