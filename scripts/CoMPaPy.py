@@ -354,6 +354,7 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
             # as strange as it can be, "width" can be directly derived from the two joint angles
             width_mm = 1000 * sum(joint_positions)
+            self.logger.info(f'[gripper] width_mm = [{width_mm:.1f}]')
 
         except Exception as e:
             error_msg = f'[get_gripper_width_mm] {e}'
