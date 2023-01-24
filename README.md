@@ -580,9 +580,39 @@ python scripts/main_example.py
 
 #### :bug: troubleshooting
 
-forgetting to `roslaunch` the `.launch` file will cause this error
-- > `[ERROR] [1673445824.345144228]: [registerPublisher] Failed to contact master at [localhost:11311]. Retrying...`
-- `roslaunch` starts `roscore` (and therefore a "`ROS` master")
+calling a `compapy` function that moves the arm, while in `programming` mode
+```
+[ INFO] [1674462487.629393072]: ABORTED: CONTROL_FAILED
+[ WARN] [1674462487.628997406]: Controller 'position_joint_trajectory_controller' failed with error GOAL_TOLERANCE_VIOLATED: panda_joint1 goal error -0.560709
+[ WARN] [1674462487.629082297]: Controller handle position_joint_trajectory_controller reports status ABORTED
+ERROR - 2023-01-23 09:28:07,629 - CoMPaPy: failed to execute plan
+ERROR - 2023-01-23 09:28:07,629 - CoMPaPy: execution of plan failed
+ERROR - 2023-01-23 09:28:08,654 - move_to_start_and_set_limits: move failed: execution of plan failed
+```
+
+starting a script to control the amr (e.g. `main_example.py`), while no ROS is running
+```
+[ERROR] [1673445824.345144228]: [registerPublisher] Failed to contact master at [localhost:11311]. Retrying...
+# note: `roslaunch` starts `roscore` (and therefore the term "`ROS` master")
+```
+
+starting `move_to_start_and_set_limits.py`, while ROS is already running
+```
+[ WARN] [1674459968.109411334]: Shutdown request received.
+[ WARN] [1674459968.110716175]: Reason given for shutdown: [[/robot_state_publisher] Reason: new node registered with same name]
+
+[ERROR] [1674459968.317361112]: Could not stop controller with name 'franka_state_controller' because no controller with this name exists
+[ERROR] [1674459968.320537739]: Could not unload controller with name 'franka_state_controller' because no controller with this name exists
+[ERROR] [1674459968.539191579]: Could not stop controller 'position_joint_trajectory_controller' since it is not running
+[ERROR] [1674459968.543604325]: Could not unload controller with name 'position_joint_trajectory_controller' because no controller with this name exists
+
+[INFO] [1674459968.539301]: Unloading all loaded controllers...
+[INFO] [1674459968.539894]: Trying to unload position_joint_trajectory_controller
+[INFO] [1674459968.543686]: Succeeded in unloading position_joint_trajectory_controller
+
+[WARN] [1674459968.569427]: Controller Spawner couldn't find the expected controller_manager ROS interface.
+```
+
 
 ### :thinking: known issues
 
