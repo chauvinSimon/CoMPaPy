@@ -596,21 +596,10 @@ starting a script to control the amr (e.g. `main_example.py`), while no ROS is r
 # note: `roslaunch` starts `roscore` (and therefore the term "`ROS` master")
 ```
 
-starting `move_to_start_and_set_limits.py`, while ROS is already running
+running a `.launch` file, while ROS is already running
 ```
 [ WARN] [1674459968.109411334]: Shutdown request received.
 [ WARN] [1674459968.110716175]: Reason given for shutdown: [[/robot_state_publisher] Reason: new node registered with same name]
-
-[ERROR] [1674459968.317361112]: Could not stop controller with name 'franka_state_controller' because no controller with this name exists
-[ERROR] [1674459968.320537739]: Could not unload controller with name 'franka_state_controller' because no controller with this name exists
-[ERROR] [1674459968.539191579]: Could not stop controller 'position_joint_trajectory_controller' since it is not running
-[ERROR] [1674459968.543604325]: Could not unload controller with name 'position_joint_trajectory_controller' because no controller with this name exists
-
-[INFO] [1674459968.539301]: Unloading all loaded controllers...
-[INFO] [1674459968.539894]: Trying to unload position_joint_trajectory_controller
-[INFO] [1674459968.543686]: Succeeded in unloading position_joint_trajectory_controller
-
-[WARN] [1674459968.569427]: Controller Spawner couldn't find the expected controller_manager ROS interface.
 ```
 
 
