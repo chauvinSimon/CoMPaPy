@@ -3,11 +3,14 @@ script to
 - overwrite the joint_limits.yaml used by moveit
 - move the arm to its start_pose
 
-if the script terminates before stopping ROS
+if the script terminates before stopping ROS, clean up with
   killall -9 rosmaster
 """
+import argparse
 import copy
+import logging
 from pathlib import Path
+import psutil
 from typing import List, Tuple, Dict
 
 import roslaunch
@@ -111,10 +114,19 @@ def get_data(use_sim: bool) -> Dict:
     }
 
 
+def kill_ros():
+    for proc in psutil.process_iter():
+        if proc.name() == 'rosmaster':
+            logging.warning('killing `rosmaster`')
+            proc.kill()
+
+
 def main(
         dof: int,
         use_sim: bool = False
 ):
+    kill_ros()
+
     data = get_data(use_sim=use_sim)
     joint_limits_path = data['joint_limits_path']
     joint_limits_5_dof_fr3_path = data['joint_limits_5_dof_fr3_path']
@@ -165,7 +177,8 @@ def main(
 
 
 if __name__ == '__main__':
-    import argparse
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.INFO)
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--dof', default=7, type=int, choices=[5, 7])
