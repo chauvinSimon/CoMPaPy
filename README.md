@@ -253,6 +253,27 @@ in a terminal
 
 ## :stethoscope: verifications
 
+### :wave: manual control
+
+in `programming` mode
+
+moving the arm
+- [this 30-second demonstration](https://youtu.be/hCfn0mzHLyM?t=59)
+
+opening/closing the gripper
+- see [this 15-second demonstration](https://youtu.be/hCfn0mzHLyM?t=220)
+- `FCI` can be activated but make sure to close RViz and stop all ROS nodes (otherwise not possible)
+
+<details>
+  <summary>:heavy_check_mark: expected result</summary>
+
+![source: Franka Emika](media/manual_move.gif)
+
+![source: Franka Emika](media/manual_gripper.gif)
+
+</details>
+
+
 ### :phone: robot connection
 
 ```
