@@ -18,6 +18,12 @@ def rotate_eef(
         if not success:
             raise RuntimeError(f'failed to move eef to [{a_deg}] deg')
 
+    # back to 0
+    a_deg = 0
+    success = compapy.rotate_joint('panda_joint7', np.deg2rad(a_deg))
+    if not success:
+        raise RuntimeError(f'failed to move eef to [{a_deg}] deg')
+
 
 def main():
     rotate_eef(
