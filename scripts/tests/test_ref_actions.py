@@ -1,3 +1,7 @@
+"""
+before testing: start robot (either real or gazebo simulation)
+"""
+
 import copy
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -78,14 +82,14 @@ class TestRefActions(unittest.TestCase):
             self.compapy.move_l(target_pose)
             self.assert_pose(target_pose=target_pose, actual_pose=self.compapy.get_pose())
 
-    def test_up_and_down(self):
+    def test_move_j_up_and_down(self):
         init_pose = self.compapy.get_pose()
 
         target_pose = copy.deepcopy(init_pose)
         target_pose.position.x += 0.3
         target_pose.position.z -= 0.3
 
-        self.compapy.move_l(target_pose)
+        self.compapy.move_j(target_pose)
         self.assert_pose(target_pose=target_pose, actual_pose=self.compapy.get_pose())
 
         self.compapy.move_l(init_pose)

@@ -1,3 +1,7 @@
+"""
+before testing: start robot (either real or gazebo simulation)
+"""
+
 import numpy as np
 import unittest
 
