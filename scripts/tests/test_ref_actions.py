@@ -1,7 +1,4 @@
 """
-set default joint-limits for the real/sim robot
-  python scripts/move_to_start_and_set_limits.py [--use_sim]
-
 run the .launch for the real/sim robot
   cf. README
 """
@@ -64,7 +61,7 @@ class TestRefActions(unittest.TestCase):
                     msg=f'{a_deg:.1f} not reached: {res_deg:.1f}'
                 )
 
-    def pass_test_go_to_joint_state(self, max_error_deg: float = 0.1):
+    def test_go_to_joint_state(self, max_error_deg: float = 0.1):
         """
         reach a ref position, stretching up as a giraffe
         """
