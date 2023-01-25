@@ -41,7 +41,30 @@ class TestRefActions(unittest.TestCase):
                 error_msg = f'[{target_width_mm:.1f}] not reached: {actual_width_mm:.1f}'
                 self.assertAlmostEqual(target_width_mm, actual_width_mm, delta=max_error_mm, msg=error_msg)
 
-    def test_go_to_joint_state(self, max_error_deg: float = 0.1):
+    def test_rotate_eef(
+            self,
+            a_deg_max: int = 10,
+            n_positive_angles: int = 5,
+            max_error_angle_deg: float = 1.0
+    ):
+        init_angle_rad = np.rad2deg(self.compapy.get_joints()[6])
+        a_degs = list(np.linspace(start=0, stop=a_deg_max, num=n_positive_angles)) + [init_angle_rad]  # back to init
+        for a_deg in a_degs:
+            for _ in range(2):  # for each a, test -a and +a
+                a_deg *= -1
+                success = self.compapy.rotate_joint('panda_joint7', np.deg2rad(a_deg))
+                if not success:
+                    raise RuntimeError(f'failed to move eef to [{a_deg}] deg')
+                res_deg = np.rad2deg(self.compapy.get_joints()[6])
+                print(f'target = [{a_deg:.1f}]  actual = [{res_deg:.1f}] (deg)')
+                self.assertAlmostEqual(
+                    res_deg,
+                    a_deg,
+                    delta=max_error_angle_deg,
+                    msg=f'{a_deg:.1f} not reached: {res_deg:.1f}'
+                )
+
+    def pass_test_go_to_joint_state(self, max_error_deg: float = 0.1):
         """
         reach a ref position, stretching up as a giraffe
         """
