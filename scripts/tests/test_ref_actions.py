@@ -1,5 +1,9 @@
 """
-before testing: start robot (either real or gazebo simulation)
+set default joint-limits for the real/sim robot
+  python scripts/move_to_start_and_set_limits.py [--use_sim]
+
+run the .launch for the real/sim robot
+  cf. README
 """
 
 import copy
@@ -16,7 +20,11 @@ class TestRefActions(unittest.TestCase):
 
     def setUp(self) -> None:
         self.compapy = CoMPaPy()
-        # todo: move to init pose
+        self.init_pose = self.compapy.get_pose()
+
+    def tearDown(self) -> None:
+        # make sure the test brings back the arm to the init-pose
+        self.assert_pose(target_pose=self.init_pose, actual_pose=self.compapy.get_pose())
 
     def test_open_close(self, n_repetition: int = 2, max_error_mm: float = 1.0):
         self.compapy.config['close_gripper']['width'] = 0.0
@@ -37,6 +45,8 @@ class TestRefActions(unittest.TestCase):
         """
         reach a ref position, stretching up as a giraffe
         """
+        init_pose = self.compapy.get_pose()
+
         self.compapy.go_to_joint_state()
 
         tau = 2.0 * np.pi
@@ -49,6 +59,10 @@ class TestRefActions(unittest.TestCase):
                 delta=np.deg2rad(max_error_deg),
                 msg=f'joint [{i}]: target={np.rad2deg(target_joint):.1f} actual={np.rad2deg(actual_joint):.1f} (deg)'
             )
+
+        # back to start
+        self.compapy.move_l(init_pose)
+        self.assert_pose(target_pose=init_pose, actual_pose=self.compapy.get_pose())
 
     def test_move_l_in_cube(self, cube_size: float = 0.05):
         """
@@ -82,6 +96,10 @@ class TestRefActions(unittest.TestCase):
             self.compapy.move_l(target_pose)
             self.assert_pose(target_pose=target_pose, actual_pose=self.compapy.get_pose())
 
+        # back to start
+        self.compapy.move_l(init_pose)
+        self.assert_pose(target_pose=init_pose, actual_pose=self.compapy.get_pose())
+
     def test_move_j_up_and_down(self):
         init_pose = self.compapy.get_pose()
 
@@ -92,7 +110,7 @@ class TestRefActions(unittest.TestCase):
         self.compapy.move_j(target_pose)
         self.assert_pose(target_pose=target_pose, actual_pose=self.compapy.get_pose())
 
-        self.compapy.move_l(init_pose)
+        self.compapy.move_j(init_pose)
         self.assert_pose(target_pose=init_pose, actual_pose=self.compapy.get_pose())
 
     def assert_pose(
@@ -122,7 +140,8 @@ class TestRefActions(unittest.TestCase):
         wrap_180 = lambda x: (x + 180) % (2 * 180) - 180
         for i, (target_r, actual_r) in enumerate(zip(target_euler, actual_euler)):
             self.assertAlmostEqual(
-                wrap_180(target_r), wrap_180(actual_r),
+                wrap_180(target_r - actual_r),
+                0.,
                 delta=delta_deg,
                 msg=f'euler [{i}]: target_r={target_r:.1f} actual_r={actual_r:.1f} (deg)'
             )
