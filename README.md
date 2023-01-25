@@ -523,12 +523,16 @@ alternatively, without `rviz`:
 
 ### :suspension_railway: `CoMPaPy` control
 
-_todo: make it work with sim.launch_
-
 in `execution` mode
 
 ```
 roslaunch compapy real.launch robot_ip:=172.16.0.2
+```
+
+alternatively to the real robot, `gazebo` can be used
+
+```
+roslaunch panda_moveit_config demo_gazebo.launch
 ```
 
 in `pycharm`, with `Working directory` set to `~/catkin_ws/src/compapy`
@@ -540,7 +544,13 @@ python scripts/tests/test_ref_actions.py
 <details>
   <summary>:heavy_check_mark: expected result</summary>
 
-![compapy_ref_moves.gif](media/compapy_ref_moves.gif)
+| [unittest_5dof.gif](media/unittest_5dof.gif) | 
+|:--:| 
+| *unit-test with `5`-dof* |
+
+| [unittest_7dof.gif](media/unittest_7dof.gif) | 
+|:--:| 
+| *unit-test with `7`-dof* |
 
 </details>
 
