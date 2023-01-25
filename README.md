@@ -544,11 +544,11 @@ python scripts/tests/test_ref_actions.py
 <details>
   <summary>:heavy_check_mark: expected result</summary>
 
-| [unittest_5dof.gif](media/unittest_5dof.gif) | 
+| [unittest_5dof.gif](media/unittests_5dof.gif) | 
 |:--:| 
 | *unit-test with `5`-dof* |
 
-| [unittest_7dof.gif](media/unittest_7dof.gif) | 
+| [unittest_7dof.gif](media/unittests_7dof.gif) | 
 |:--:| 
 | *unit-test with `7`-dof* |
 
