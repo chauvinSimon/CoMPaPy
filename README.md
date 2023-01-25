@@ -34,13 +34,11 @@ with [moveit](https://ros-planning.github.io/moveit_tutorials/doc/getting_starte
 - may require some parameter tuning
     - e.g. `compute_cartesian_path()` params in `move_l`
 - control `panda_link8` instead of the gripper :weary:
-    - todo: [ros.org/question/334902](https://answers.ros.org/question/334902/moveit-control-gripper-instead-of-panda_link8-eff/)
+    - _todo: [ros.org/question/334902](https://answers.ros.org/question/334902/moveit-control-gripper-instead-of-panda_link8-eff/)_
 
 ## :wrench: installation
 
-notes
-
-- installing `libfranka` and `franka_ros` with `sudo apt install ros-noetic- ...` is not an option at the time of
+note: installing `libfranka` and `franka_ros` with `sudo apt install ros-noetic- ...` is not an option at the time of
   writing: it gives incompatible versions
 
 create a directory for all packages
@@ -62,6 +60,8 @@ tree ~/catkin_ws/src -d -L 2
 ├── compapy
 │     ├── config
 │     ├── launch
+│     ├── media
+│     ├── logs
 │     └── scripts
 ├── franka_ros
 │     ├── cmake
@@ -323,15 +323,14 @@ roslaunch franka_visualization franka_visualization.launch robot_ip:=172.16.0.2 
 roslaunch franka_example_controllers move_to_start.launch robot_ip:=172.16.0.2
 ```
 
-the pose defined in [`start_pose.yaml`](https://github.com/frankaemika/franka_ros/blob/develop/franka_control/config/start_pose.yaml) is reached
-- the `max_dq` parameter, in `rad/s`, is [used to control the duration of the move](https://github.com/frankaemika/franka_ros/blob/develop/franka_example_controllers/scripts/move_to_start.py#L33), hence the speed
-
 <details>
-  <summary>note</summary>
+  <summary>notes</summary>
 
-`franka_visualization.launch` raises the following, but the command can still be executed
+- the pose defined in [`start_pose.yaml`](https://github.com/frankaemika/franka_ros/blob/develop/franka_control/config/start_pose.yaml) is reached
+  - the `max_dq` parameter, in `rad/s`, is [used to control the duration of the move](https://github.com/frankaemika/franka_ros/blob/develop/franka_example_controllers/scripts/move_to_start.py#L33), hence the speed
 
-> `Robot semantic description not found. Did you forget to define or remap '/robot_description_semantic'?`
+- `franka_visualization.launch` raises the following, but the command can still be executed
+  - > `Robot semantic description not found. Did you forget to define or remap '/robot_description_semantic'?`
 
 </details>
 
@@ -343,7 +342,7 @@ in `programming` mode
 roslaunch franka_visualization franka_visualization.launch robot_ip:=172.16.0.2 load_gripper:=true
 ```
 
-- move the cooperative robot manually (press the two buttons on the gripper)
+- move the arm manually (gently press the two buttons on the gripper)
 - see the corresponding motion in `rviz`
 
 <details>
@@ -558,13 +557,15 @@ python scripts/tests/test_eef_rotation.py
 
 ## :checkered_flag: usage
 
+### :chopsticks: gripper
+
+adjust the parameters for `close_gripper()`, depending on the width of the object to grasp, in [`compapy.yaml`](config/compapy.yaml#L22)
+
 ### :evergreen_tree: scene
 
 define obstacles in [`obstacles.json`](config/obstacles.json)
 
-adjust the parameters for `close_gripper()`, depending on the width of the object to grasp, in [`compapy.yaml`](config/compapy.yaml)
-
-visualize them with
+then visualize them with
 
 ```
 roslaunch compapy sim.launch
