@@ -554,17 +554,6 @@ python scripts/tests/test_ref_actions.py
 
 </details>
 
-```
-python scripts/tests/test_eef_rotation.py
-```
-
-<details>
-  <summary>:heavy_check_mark: expected result</summary>
-
-![eef_rotation.gif](media/eef_rotation.gif)
-
-</details>
-
 ## :checkered_flag: usage
 
 ### :chopsticks: gripper
