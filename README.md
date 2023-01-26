@@ -262,7 +262,7 @@ in `programming` mode
 
 - open/close the gripper
   - see [this 15-sec demo](https://youtu.be/hCfn0mzHLyM?t=220)
-  - `FCI` can stay activated but make sure to close `RViz` and stop all `ROS` nodes
+  - `FCI` can stay activated but make sure to close `RViz` and stop all `ROS` nodes (otherwise `End Effector: Not Connected`)
 
 <details>
   <summary>:heavy_check_mark: expected result</summary>
