@@ -255,12 +255,12 @@ in a terminal
 
 ### :wave: manual control
 
-in `programming` mode
-
 - move the arm
+  - in `programming` mode
   - see [this 30-sec demo](https://youtu.be/hCfn0mzHLyM?t=59)
 
 - open/close the gripper
+  - in `programming` mode or `execution` mode
   - see [this 15-sec demo](https://youtu.be/hCfn0mzHLyM?t=220)
   - `FCI` can stay activated but make sure to close `RViz` and stop all `ROS` nodes (otherwise `End Effector: Not Connected`)
 
