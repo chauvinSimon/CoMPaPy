@@ -38,6 +38,7 @@ def move_to(
     if not use_sim:
         compapy.open_gripper()
         compapy.close_gripper()
+        compapy.open_gripper()
 
     if use_sim:
         # with rviz, the initial pose is already the target_pose
