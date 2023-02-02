@@ -48,6 +48,8 @@ def main(
         s.connect((host, port))
         compapy.logger.info(f'socket timeout = {s.gettimeout()}')
 
+        gripper_gap_mm_overwritten = 1000 * compapy.config['open_gripper']['width']
+
         while True:
             data = s.recv(1024)
             data = data.decode('utf-8')
@@ -169,12 +171,20 @@ def main(
                 f'(euler-deg)'
             )
 
-            gripper_gap_mm, gripper_err_msg = compapy.get_gripper_width_mm()
-            if gripper_gap_mm is None:
-                success = False
-                msg = f'could not read gripper_gap: [{gripper_err_msg}]'
-                logger.error(msg)
-                error_msg += f' {msg} '
+            if ignore_gripper:
+                if data == '>gripper<>0<':
+                    gripper_gap_mm_overwritten = 57.4  # todo: read from config
+                elif data == '>gripper<>1<':
+                    gripper_gap_mm_overwritten = 1000 * compapy.config['open_gripper']['width']
+                gripper_gap_mm = gripper_gap_mm_overwritten
+
+            else:
+                gripper_gap_mm, gripper_err_msg = compapy.get_gripper_width_mm()
+                if gripper_gap_mm is None:
+                    success = False
+                    msg = f'could not read gripper_gap: [{gripper_err_msg}]'
+                    logger.error(msg)
+                    error_msg += f' {msg} '
 
             state_str = state_to_str(
                 gripper_gap_mm=gripper_gap_mm,
