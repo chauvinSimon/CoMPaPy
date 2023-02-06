@@ -302,7 +302,11 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             grasp_client.send_goal(goal)
 
             # Waits for the server to finish performing the action.
-            grasp_client.wait_for_result()
+            timeout_closing = rospy.Duration(secs=5)
+            # by default wait_for_result is blocking (secs=0)
+            #   this blocks `close_gripper()` when an object is already hold
+            #   todo: is there a more elegant way to deal with that?
+            grasp_client.wait_for_result(timeout=timeout_closing)
 
             # Prints out the result of executing the action
             result = grasp_client.get_result()
