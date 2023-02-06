@@ -83,6 +83,7 @@ def get_data(use_sim: bool) -> Dict:
     joint_limits_path = Path('../franka_ros/franka_description/robots/panda/joint_limits.yaml')
     joint_limits_7_dof_fr3_path = Path('../franka_ros/franka_description/robots/fr3/joint_limits.yaml')
     joint_limits_5_dof_fr3_path = Path('config/joint_limits_fr3_noj3_noj5.yaml')
+    joint_limits_5plus_dof_fr3_path = Path('config/joint_limits_fr3_noj3_smallj5.yaml')
 
     launch_path = Path(f"launch/{'sim' if use_sim else 'real'}.launch")
     launch_path_abs_str = str(launch_path.resolve().absolute())
@@ -92,6 +93,7 @@ def get_data(use_sim: bool) -> Dict:
         joint_limits_path,
         joint_limits_7_dof_fr3_path,
         joint_limits_5_dof_fr3_path,
+        joint_limits_5plus_dof_fr3_path,
         launch_path,
     ]:
         assert p.exists(), f'file does not exist: {p}\n' \
@@ -109,6 +111,7 @@ def get_data(use_sim: bool) -> Dict:
     return {
         'joint_limits_path': joint_limits_path,
         'joint_limits_5_dof_fr3_path': joint_limits_5_dof_fr3_path,
+        'joint_limits_5plus_dof_fr3_path': joint_limits_5plus_dof_fr3_path,
         'joint_limits_7_dof_fr3_path': joint_limits_7_dof_fr3_path,
         'launch_path_abs_str': launch_path_abs_str,
         'target_joint_values': target_joint_values,
@@ -131,6 +134,7 @@ def main(
     data = get_data(use_sim=use_sim)
     joint_limits_path = data['joint_limits_path']
     joint_limits_5_dof_fr3_path = data['joint_limits_5_dof_fr3_path']
+    joint_limits_5plus_dof_fr3_path = data['joint_limits_5plus_dof_fr3_path']
     joint_limits_7_dof_fr3_path = data['joint_limits_7_dof_fr3_path']
     launch_path_abs_str = data['launch_path_abs_str']
     target_joint_values = data['target_joint_values']
@@ -175,6 +179,12 @@ def main(
             a=joint_limits_5_dof_fr3_path,
             b=joint_limits_path,
         )
+    elif dof == 5.5:
+        logger.info('setting 5 dof ...')
+        copy_a_to_b(
+            a=joint_limits_5plus_dof_fr3_path,
+            b=joint_limits_path,
+        )
 
 
 if __name__ == '__main__':
@@ -182,7 +192,7 @@ if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dof', default=7, type=int, choices=[5, 7])
+    parser.add_argument('--dof', default=7, type=float, choices=[5, 5.5, 7])
     parser.add_argument('--use_sim', action='store_true')
     args = parser.parse_args()
 
