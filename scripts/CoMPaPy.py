@@ -261,22 +261,17 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
     def open_gripper(self) -> bool:
         try:
-            # Initialize actionLib client
             move_client = actionlib.SimpleActionClient('/franka_gripper/move', franka_gripper.msg.MoveAction)
             move_client.wait_for_server()
 
-            # Creates a goal to send to the action server.
             goal = franka_gripper.msg.MoveGoal()
             goal.width = self.config['open_gripper']['width']
             goal.speed = self.config['open_gripper']['speed']
 
-            # Sends the goal to the action server.
             move_client.send_goal(goal)
 
-            # Waits for the server to finish performing the action.
             move_client.wait_for_result()  # todo: duration?
 
-            # Prints out the result of executing the action
             result = move_client.get_result()
             return result.success
 
@@ -286,11 +281,14 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
 
     def close_gripper(self) -> bool:
         try:
-            # Initialize actionLib client
+            width_max_m = self.config['close_gripper']['width'] + self.config['close_gripper']['epsilon_outer']
+            if self.get_gripper_width_mm() < width_max_m * 1000:
+                self.logger.warning('trying to close while already closed')
+                return True
+
             grasp_client = actionlib.SimpleActionClient('/franka_gripper/grasp', franka_gripper.msg.GraspAction)
             grasp_client.wait_for_server()
 
-            # Creates a goal to send to the action server.
             goal = franka_gripper.msg.GraspGoal()
             goal.width = self.config['close_gripper']['width']
             goal.epsilon.inner = self.config['close_gripper']['epsilon_inner']
@@ -298,17 +296,10 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
             goal.speed = self.config['close_gripper']['speed']
             goal.force = self.config['close_gripper']['force']
 
-            # Sends the goal to the action server.
             grasp_client.send_goal(goal)
 
-            # Waits for the server to finish performing the action.
-            timeout_closing = rospy.Duration(secs=5)
-            # by default wait_for_result is blocking (secs=0)
-            #   this blocks `close_gripper()` when an object is already hold
-            #   todo: is there a more elegant way to deal with that?
-            grasp_client.wait_for_result(timeout=timeout_closing)
+            grasp_client.wait_for_result()
 
-            # Prints out the result of executing the action
             result = grasp_client.get_result()
             success = result.success
             if not success:
