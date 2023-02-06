@@ -210,13 +210,13 @@ if __name__ == '__main__':
                         help='speed up the simulation by [plan+teleport] instead of [plan+execute]')
     parser.add_argument('--ignore_gripper', action='store_true',
                         help='speed up the simulation by not opening/closing the gripper')
-    parser.add_argument('--ignore_target_processing', action='store_true',
-                        help='disable the specific processing '
+    parser.add_argument('--use_target_processing', action='store_true',
+                        help='enable the specific processing '
                              'e.g. make sure the gripper stays vertical and wrap its yaw angle to a particular range')
     args = parser.parse_args()
 
     main(
         teleport=args.teleport,
         ignore_gripper=args.ignore_gripper,
-        process_target=not args.ignore_target_processing,
+        process_target=args.use_target_processing,
     )
