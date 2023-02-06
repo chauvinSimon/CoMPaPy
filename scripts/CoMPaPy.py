@@ -282,7 +282,8 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
     def close_gripper(self) -> bool:
         try:
             width_max_m = self.config['close_gripper']['width'] + self.config['close_gripper']['epsilon_outer']
-            if self.get_gripper_width_mm() < width_max_m * 1000:
+            width_mm, err_msg = self.get_gripper_width_mm()
+            if (width_mm is not None) and (width_mm < width_max_m * 1000):
                 self.logger.warning('trying to close while already closed')
                 return True
 
