@@ -2,17 +2,15 @@
 socket client for the panda robot-arm
 """
 import argparse
-import numpy as np
 from pathlib import Path
 from scipy.spatial.transform import Rotation
 import socket
 import time
 
-from geometry_msgs.msg import Pose
-
 from compapy.scripts.MyCoMPaPy import MyCoMPaPy
 from compapy.scripts.utils import setup_logger
 from compapy.scripts.socket_interface.frame_conversion import link8_in_base, ee_in_base
+from compapy.scripts.socket_interface.pose_conversion import pose_from_xyz_and_rotvec, xyz_and_rotvec_from_pose
 
 
 def state_to_str(
@@ -71,31 +69,16 @@ def main(
                     #   IMPORTANT: pose of the tip of the end-effector (not link8!) relative to the robot base
                     #   IMPORTANT: Rot-Vec, not RPY/Euler!
 
-                    target_pose_l8_in_base = link8_in_base(ee_in_base=target_pose_ee_in_base)
-
-                    target_pose = Pose()
-                    target_pose.position.x = target_pose_l8_in_base[0]
-                    target_pose.position.y = target_pose_l8_in_base[1]
-                    target_pose.position.z = target_pose_l8_in_base[2]
-
-                    rot_vec = target_pose_l8_in_base[3:6]
-                    logger.debug(f'l8: rot_vec = {[round(e, 3) for e in rot_vec]}')
-                    euler_rad = Rotation.from_rotvec(rot_vec).as_euler('xyz')
-                    logger.debug(f'l8: euler = {[round(np.rad2deg(e), 1) for e in euler_rad]} (ext deg)')
-
-                    q = Rotation.from_rotvec(rot_vec).as_quat()
-
-                    target_pose.orientation.x = q[0]
-                    target_pose.orientation.y = q[1]
-                    target_pose.orientation.z = q[2]
-                    target_pose.orientation.w = q[3]
+                    target_l8_pose = pose_from_xyz_and_rotvec(
+                        xyz_and_rotvec=link8_in_base(ee_in_base=target_pose_ee_in_base)
+                    )
 
                     if teleport:
                         # todo success = compapy.teleport(target_pose)
                         raise NotImplementedError
                     else:
                         success, move_err_msg = compapy.my_move(
-                            target_pose=target_pose,
+                            target_pose=target_l8_pose,
                             process_target=process_target
                         )
                         if move_err_msg:
@@ -143,26 +126,10 @@ def main(
 
             l8_pose = compapy.get_pose()
 
-            # prepare conversion from L8 to EE
-            l8_in_base_out = [0.0] * 6
-
-            l8_in_base_out[0] = l8_pose.position.x
-            l8_in_base_out[1] = l8_pose.position.y
-            l8_in_base_out[2] = l8_pose.position.z
-
-            logger.debug('reading out values')
-            logger.debug(f'l8_position_in_base_out = {[round(e, 2) for e in l8_in_base_out[:3]]}')
-
-            r_out = Rotation.from_quat([
-                l8_pose.orientation.x,
-                l8_pose.orientation.y,
-                l8_pose.orientation.z,
-                l8_pose.orientation.w
-            ])
-            logger.debug(f'r_base_to_l8 = {[round(e, 2) for e in r_out.as_euler("xyz", degrees=True)]} (euler-deg)')
-            l8_in_base_out[3:6] = r_out.as_rotvec()
-
-            ee_in_base_out = ee_in_base(l8_in_base_out)
+            l8_xyz_and_rotvec = xyz_and_rotvec_from_pose(
+                pose=l8_pose
+            )
+            ee_in_base_out = ee_in_base(l8_xyz_and_rotvec)
 
             logger.debug(f'ee_in_base_out: {[round(e, 2) for e in ee_in_base_out]}')
             logger.debug(
