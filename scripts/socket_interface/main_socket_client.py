@@ -41,6 +41,10 @@ def main(
     host = "127.0.0.1"
     port = 65432
 
+    if not compapy.move_to_init_pose():
+        logger.error('could not move to init pose')
+        return
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.setblocking(True)  # equivalent to sock.settimeout(None), otherwise "socket.timeout: timed out"
         s.connect((host, port))
@@ -160,7 +164,7 @@ def main(
             )
 
             if error_msg:
-                state_str = f'msg=[{error_msg}] || state_str={state_str}'
+                logger.warning(f'[success={success}] {"... but ... " if success else ""}: {error_msg}')
             if not success:
                 state_str = f'error: {state_str}'
 

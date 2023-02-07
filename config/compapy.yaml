@@ -34,3 +34,5 @@ close_gripper:
 
 my_move:
   n_trials_plan_l: 10
+
+init_ee_xyz_and_rotvec: [0.5, 0.0, 0.5, 3.1415, 0.0, 0.0]

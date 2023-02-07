@@ -11,8 +11,10 @@ from scipy.spatial.transform import Rotation
 from typing import Optional, Tuple
 
 import geometry_msgs
+from compapy.scripts.socket_interface.frame_conversion import link8_in_base
+from compapy.scripts.socket_interface.pose_conversion import pose_from_xyz_and_rotvec
 from compapy.scripts.utils import wrap_to_pi, wrap_to_pi_over_four
-from geometry_msgs.msg import Pose, Quaternion
+from geometry_msgs.msg import Point, Pose, Quaternion
 
 from compapy.scripts.CoMPaPy import CoMPaPy
 
@@ -114,3 +116,16 @@ class MyCoMPaPy(CoMPaPy):
         euler_rad = [np.pi, 0, rz_rad]
         q = Rotation.from_euler(angles=euler_rad, seq='xyz').as_quat()
         return Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+
+    def move_to_init_pose(self) -> bool:
+        if 'init_ee_xyz_and_rotvec' not in self.config:
+            self.logger.error(f'no init_pose in config')
+
+        init_l8_xyz_and_rotvec = link8_in_base(ee_in_base=self.config['init_ee_xyz_and_rotvec'])
+        target_pose = pose_from_xyz_and_rotvec(xyz_and_rotvec=init_l8_xyz_and_rotvec)
+        success, err_msg = self.my_move(
+            target_pose=target_pose
+        )
+        if err_msg:
+            self.logger.warning(f'{err_msg}')
+        return success
