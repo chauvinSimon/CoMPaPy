@@ -1,10 +1,12 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 
+d_ee_l8_m = 0.1035
+
 
 def ee_in_base(l8_in_base):
     # todo: test
-    ee_in_l8 = np.array([0, 0, 0.113])  # todo: measure precisely. also in rviz when vertical
+    ee_in_l8 = np.array([0, 0, d_ee_l8_m])
     r_l8_to_ee = Rotation.from_euler(angles=[0, 0, -45], seq='xyz', degrees=True)
 
     print(f'l8_in_base: {[round(e, 2) for e in l8_in_base[:3]]}')
@@ -29,7 +31,7 @@ def ee_in_base(l8_in_base):
 
 
 def link8_in_base(ee_in_base):
-    l8_in_ee = np.array([0, 0, -0.113])  # todo: measure precisely. also in rviz when vertical
+    l8_in_ee = np.array([0, 0, -d_ee_l8_m])
     r_ee_to_l8 = Rotation.from_euler(angles=[0, 0, 45], seq='xyz', degrees=True)
 
     print(f'ee_in_base: {[round(e, 2) for e in ee_in_base[:3]]}')
