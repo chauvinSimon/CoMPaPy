@@ -34,6 +34,7 @@ with [moveit](https://ros-planning.github.io/moveit_tutorials/doc/getting_starte
 - may require some parameter tuning
     - e.g. `compute_cartesian_path()` params in `move_l`
 - control `panda_link8` instead of the gripper :weary:
+    - c.f. [known issues](#thinking-known-issues)
     - _todo: [ros.org/question/334902](https://answers.ros.org/question/334902/moveit-control-gripper-instead-of-panda_link8-eff/)_
 
 ## :wrench: installation
@@ -627,7 +628,7 @@ running a `.launch` file, while ROS is already running
 ### :thinking: known issues
 
 <details>
-  <summary>:100: `move_l` cannot compute an entire `plan`</summary>
+  <summary>:100: [move_l] cannot compute an entire [plan]</summary>
 
 what can help:
 
@@ -645,7 +646,7 @@ what can help:
 </details>
 
 <details>
-  <summary>:woozy_face: the computed `plan` includes strange joint moves</summary>
+  <summary>:woozy_face: the computed [plan] includes strange joint moves</summary>
 
 | ![joints.gif](media/joints.gif) | 
 |:--:| 
@@ -679,7 +680,7 @@ what can help:
 </details>
 
 <details>
-  <summary>:game_die:	`compute_cartesian_path` is not deterministic</summary>
+  <summary>:game_die:	[compute_cartesian_path] is not deterministic</summary>
 
 using the same configurations and parameters, `compute_cartesian_path()` can return `plan` that differ in size
 
@@ -689,14 +690,14 @@ using the same configurations and parameters, `compute_cartesian_path()` can ret
 </details>
 
 <details>
-  <summary>:game_die: the `compapy.move` functions move the `panda_link8` frame to the passed target poses, not the `panda_EE` </summary>
+  <summary>:mechanical_arm: the [compapy.move] functions move the [panda_link8] frame to the passed [target_pose], not [panda_EE] </summary>
 
 I could not find how to directly control `panda_EE` instead
 - an example of frame conversion can be found in [`frame_conversion.py`](scripts/socket_interface/frame_conversion.py)
 
 | ![panda_axes.png](media/panda_axes.png) | 
 |:--:| 
-| *`compapy.move` functions move the __`panda_link8` frame__ to the passed target poses, __not the `panda_EE`__* |
+| *`compapy.move` functions move the __`panda_link8` frame__ to the passed `target_pose`, __not the `panda_EE`__* |
 
 here the measurements used to derive some of the parameters for the conversion:
 
