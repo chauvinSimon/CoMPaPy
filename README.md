@@ -692,12 +692,12 @@ using the same configurations and parameters, `compute_cartesian_path()` can ret
 <details>
   <summary>:mechanical_arm: the [compapy.move] functions move the [panda_link8] frame to the passed [target_pose], not [panda_EE] </summary>
 
-I could not find how to directly control `panda_EE` instead
-- an example of frame conversion can be found in [`frame_conversion.py`](scripts/socket_interface/frame_conversion.py)
-
 | ![panda_axes.png](media/panda_axes.png) | 
 |:--:| 
-| *`compapy.move` functions move the __`panda_link8` frame__ to the passed `target_pose`, __not the `panda_EE`__* |
+| *`compapy.move` functions move the __`panda_link8` frame__ to the passed `target_pose`, __not `panda_EE`__* |
+
+- an example of frame conversion can be found in [`frame_conversion.py`](scripts/socket_interface/frame_conversion.py)
+- I could not find how to directly control `panda_EE` instead
 
 here the measurements used to derive some of the parameters for the conversion:
 
