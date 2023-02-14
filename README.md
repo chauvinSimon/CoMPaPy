@@ -689,21 +689,28 @@ using the same configurations and parameters, `compute_cartesian_path()` can ret
 </details>
 
 <details>
-  <summary>:game_die: control is applied to `link8` - not `end-effector` </summary>
+  <summary>:game_die: the `compapy.move` functions move the `panda_link8` frame to the passed target poses, not the `panda_EE` </summary>
+
+I could not find how to directly control `panda_EE` instead
+- an example of frame conversion can be found in [`frame_conversion.py`](scripts/socket_interface/frame_conversion.py)
+
+| ![panda_axes.png](media/panda_axes.png) | 
+|:--:| 
+| *`compapy.move` functions move the __`panda_link8` frame__ to the passed target poses, __not the `panda_EE`__* |
+
+here the measurements used to derive some of the parameters for the conversion:
 
 | ![panda_origins_of_coordinates_systems.png](media/panda_origins_of_coordinates_systems.png) | 
 |:--:| 
-| *the fingers are in contact with the ground plane: `panda_EE`.`z` = `8.5`mm and `panda_link8`.`z` = `111.6`mm* |
+| *measurements when the fingers are in contact with the ground plane: `panda_EE.z = 8.5mm` and `panda_link8.z = 111.6mm`* |
 
-conclusions from the above measurement:
-- the origin of the `panda_EE` frame is located between the finger pads, at `~8`mm from the tip
+conclusions from the above measurements:
 - the `z` offset between `panda_EE` and `panda_link8` is `~103`mm
+- the origin of the `panda_EE` frame is located between the finger pads, at `~8`mm from the tip
 
 | ![panda_origins_ee_on_finger.png](media/panda_origins_ee_on_finger.png) | 
 |:--:| 
-| *origin of `panda_EE` - when the gripper is close, otherwise middle of the two fingers* |
-
-examples for frame conversion can be found in [`frame_conversion.py`](scripts/socket_interface/frame_conversion.py)
+| *origin of `panda_EE`, at `~8.5`mm from the tip* |
 
 </details>
 
