@@ -688,6 +688,25 @@ using the same configurations and parameters, `compute_cartesian_path()` can ret
 
 </details>
 
+<details>
+  <summary>:game_die: control is applied to `link8` - not `end-effector` </summary>
+
+| ![panda_origins_of_coordinates_systems.png](media/panda_origins_of_coordinates_systems.png) | 
+|:--:| 
+| *the fingers are in contact with the ground plane: `panda_EE`.`z` = `8.5`mm and `panda_link8`.`z` = `111.6`mm* |
+
+conclusions from the above measurement:
+- the origin of the `panda_EE` frame is located between the finger pads, at `~8`mm from the tip
+- the `z` offset between `panda_EE` and `panda_link8` is `~103`mm
+
+| ![panda_origins_ee_on_finger.png](media/panda_origins_ee_on_finger.png) | 
+|:--:| 
+| *origin of `panda_EE` - when the gripper is close, otherwise middle of the two fingers* |
+
+examples for frame conversion can be found in [`frame_conversion.py`](scripts/socket_interface/frame_conversion.py)
+
+</details>
+
 ## :+1: acknowledgements
 
 the following resources helped me understand how to control the robot

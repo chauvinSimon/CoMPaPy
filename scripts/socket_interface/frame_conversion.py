@@ -1,3 +1,10 @@
+"""
+convert a pose (position and orientation) between
+- `panda_EE`
+- `panda_link8`
+the pose is a 6d list, where the orientation is encoded as a rotvec (! NOT EULER / RPY !)
+"""
+
 import numpy as np
 from scipy.spatial.transform import Rotation
 
@@ -56,8 +63,9 @@ def link8_in_base(ee_in_base):
 
 
 def main():
-    # example, with orientation as on the image
-    link8_in_base([0., 0., 0., np.pi, 0., 0.])
+    # example, with orientation of the default pose
+    ee_xyz_rot_vec_in_base = link8_in_base([0., 0., 0., np.pi, 0., 0.])
+    print(ee_xyz_rot_vec_in_base)
 
 
 if __name__ == '__main__':
