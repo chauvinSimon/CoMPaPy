@@ -511,8 +511,8 @@ then
 
 alternatively, without `rviz`:
 
-```bash
-~/workspaces_ros_noetic/ewaste/rob_ws$ rosrun tf tf_echo /panda_link0 /panda_EE
+```
+rosrun tf tf_echo /panda_link0 /panda_EE
 ```
 
 <details>
