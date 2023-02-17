@@ -7,7 +7,7 @@ import time
 from compapy.scripts.CoMPaPy import CoMPaPy
 
 
-def main(n_measures: int = 1000):
+def main(n_measures: int = 100):
     compapy = CoMPaPy()
 
     start_time = time.time()
