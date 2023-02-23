@@ -318,7 +318,8 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
         return self.move_group.get_current_joint_values()
 
     def get_gripper_width_mm(
-            self
+            self,
+            use_logger: bool=True
     ) -> Tuple[Optional[float], str]:
         """
         todo:
@@ -346,11 +347,13 @@ class CoMPaPy(MoveGroupPythonInterfaceTutorial):
                 self.logger.error(f'[gripper] msg.name = {msg.name}')
 
             joint_positions = msg.position
-            self.logger.info(f'[gripper] joint_positions = {joint_positions}')
+            if use_logger:
+                self.logger.info(f'[gripper] joint_positions = {joint_positions}')
 
             # as strange as it can be, "width" can be directly derived from the two joint angles
             width_mm = 1000 * sum(joint_positions)
-            self.logger.info(f'[gripper] width_mm = [{width_mm:.1f}]')
+            if use_logger:
+                self.logger.info(f'[gripper] width_mm = [{width_mm:.1f}]')
 
         except Exception as e:
             error_msg = f'[get_gripper_width_mm] {e}'
