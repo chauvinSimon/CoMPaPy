@@ -3,10 +3,10 @@
     {
       "name": "table",
       "type": "static_box",
-      "x": 0.30,
+      "x": -0.2,
       "y": 0.70,
       "z": -0.50,
-      "size_x": 2.00,
+      "size_x": 0.7,
       "size_y": 1.90,
       "size_z": 0.95
     },
@@ -31,16 +31,6 @@
       "size_z": 0.7
     },
     {
-      "name": "conv_belt",
-      "type": "static_box",
-      "x": 0.60,
-      "y": 0.02,
-      "z": 0.02,
-      "size_x": 1.0,
-      "size_y": 0.55,
-      "size_z": 0.05
-    },
-    {
       "name": "tv",
       "type": "static_box",
       "x": -0.50,
@@ -63,8 +53,8 @@
     {
       "name": "cam",
       "type": "static_box",
-      "x": -0.125,
-      "y": -0.28,
+      "x": 0.125,
+      "y": -0.2,
       "z": 0.015,
       "size_x": 0.15,
       "size_y": 0.1,
